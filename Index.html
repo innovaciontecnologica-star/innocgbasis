@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGB Digital - Sistema Escolar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        .slide-in { animation: slideIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-blue-100 min-h-screen text-slate-900 font-sans antialiased pb-10 flex flex-col">
+
+    <nav class="bg-blue-950 text-white px-4 py-4 sticky top-0 z-50 shadow-md">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="goToPortal()">
+                <div class="bg-black/20 p-1 rounded-xl backdrop-blur-md border border-white/10 flex items-center justify-center shadow-inner">
+                    <img src="logo guardianes.png" alt="Guardianes CGB" class="w-10 h-10 object-contain rounded-lg" onerror="this.onerror=null; this.src='https://placehold.co/100/1e1b4b/white?text=CGB';">
+                </div>
+                <div>
+                    <h1 class="font-black text-lg leading-none tracking-tight">CGB DIGITAL</h1>
+                    <p class="text-[10px] font-bold opacity-70 uppercase">Control Escolar</p>
+                </div>
+            </div>
+            <div class="bg-blue-900/50 px-3 py-1.5 rounded-full border border-white/10 text-right">
+                <p id="current-date" class="text-[10px] font-bold uppercase tracking-widest text-blue-100"></p>
+                <p id="nav-school-year" class="text-[8px] font-bold text-orange-400">Ciclo 2024 - 2025</p>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-md mx-auto p-4 flex-1 w-full">
+        
+        <!-- VISTA: PORTAL -->
+        <div id="view-portal" class="space-y-4 fade-in">
+            <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-blue-900/10 border border-slate-100 text-center">
+                <div class="mx-auto mb-6 flex justify-center">
+                    <img src="logo CGB.png" alt="Colegio Gran Bretaña" class="h-16 md:h-20 object-contain" onerror="this.onerror=null; this.src='https://placehold.co/200x80/1e1b4b/white?text=CGB';">
+                </div>
+                <h2 class="text-2xl font-black text-slate-800 tracking-tight">Bienvenido</h2>
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1 mb-8">Selecciona tu perfil de acceso</p>
+
+                <div class="space-y-3">
+                    <button onclick="openTeacherFlow()" class="w-full bg-blue-950 text-white font-black py-4 rounded-2xl shadow-lg shadow-blue-900/30 transition-all active:scale-95 flex items-center justify-between px-6">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-chalkboard-user"></i> Soy Maestro</span>
+                        <i class="fa-solid fa-chevron-right opacity-50"></i>
+                    </button>
+                    
+                    <button onclick="openTeacherRegistration()" class="w-full bg-orange-50 text-orange-700 font-black py-4 rounded-2xl border border-orange-100 transition-all active:scale-95 flex items-center justify-between px-6 hover:bg-orange-100">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-user-plus"></i> Registro Nuevo Maestro</span>
+                        <i class="fa-solid fa-chevron-right opacity-50"></i>
+                    </button>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-slate-100 space-y-3">
+                    <button onclick="promptLogin('direccion')" class="w-full bg-slate-50 text-slate-600 font-black py-4 rounded-2xl border border-slate-200 transition-all active:scale-95 flex items-center justify-between px-6 hover:bg-slate-100">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-building-user"></i> Dirección</span>
+                        <i class="fa-solid fa-lock text-slate-300"></i>
+                    </button>
+                    
+                    <button onclick="promptLogin('admin')" class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-between px-6">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-user-shield text-orange-500"></i> Administrador</span>
+                        <i class="fa-solid fa-lock text-slate-500"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA: REGISTRO DOCENTE -->
+        <div id="view-register" class="space-y-6 fade-in hidden">
+            <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-blue-900/10 border border-slate-100">
+                <button onclick="goToPortal()" class="text-slate-400 mb-4 hover:text-blue-950 transition-colors"><i class="fa-solid fa-arrow-left"></i> Volver</button>
+                <h2 class="text-2xl font-black text-slate-800 tracking-tight">Registro Docente</h2>
+                <p class="text-xs text-slate-400 font-bold mb-6">Agrega tu nombre para aparecer en la lista de toma de asistencia.</p>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Nombre Completo / Título</label>
+                        <input type="text" id="new-teacher-name" placeholder="Ej. Prof. Juan Pérez..." class="w-full mt-1 p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-orange-500 font-bold text-slate-700 uppercase">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Crear NIP (4 Dígitos)</label>
+                        <input type="password" id="new-teacher-pin" maxlength="4" pattern="\d{4}" placeholder="Ej. 1234" class="w-full mt-1 p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-orange-500 font-bold text-slate-700 text-center tracking-[1em]">
+                    </div>
+                    <button onclick="registerTeacher()" class="w-full bg-orange-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-orange-200 transition-all active:scale-95">
+                        Registrarme
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA: PANEL ADMIN / DIRECCIÓN -->
+        <div id="view-admin" class="space-y-6 fade-in hidden">
+            <div class="bg-white rounded-[2.5rem] p-6 shadow-xl shadow-blue-900/10 border border-slate-100">
+                <div class="flex items-center justify-between mb-6">
+                    <button onclick="goToPortal()" class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 active:scale-90 transition-all"><i class="fa-solid fa-arrow-left"></i></button>
+                    <div class="text-right">
+                        <h2 id="admin-panel-title" class="text-xl font-black text-slate-800 tracking-tight">Panel</h2>
+                        <span id="admin-panel-role" class="bg-orange-100 text-orange-700 text-[9px] font-black px-2 py-1 rounded-md uppercase tracking-wider">Rol</span>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                        <h3 class="font-black text-sm text-blue-950 mb-2 flex items-center gap-2"><i class="fa-solid fa-chart-pie"></i> Estadísticas Generales</h3>
+                        <p class="text-xs text-blue-800 mb-3 leading-tight">Visualiza el porcentaje de asistencia, faltas y retardos por grupo y alumno en tiempo real.</p>
+                        <button onclick="openStatistics()" class="w-full bg-blue-950 text-white font-bold py-3 rounded-xl shadow-md active:scale-95 text-sm"><i class="fa-solid fa-table-list mr-1"></i> Ver Tablero de Datos</button>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <h3 class="font-black text-sm text-slate-700 mb-3 flex items-center gap-2"><i class="fa-solid fa-calendar-days text-blue-950"></i> Ciclo Escolar Actual</h3>
+                        <div class="flex gap-2">
+                            <input type="text" id="input-school-year" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 text-sm font-bold outline-none focus:border-blue-500 uppercase">
+                            <button onclick="saveSchoolYear()" class="bg-blue-950 text-white px-4 py-2 rounded-xl font-bold text-xs active:scale-95">Actualizar</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
+                        <h3 class="font-black text-sm text-emerald-800 mb-2 flex items-center gap-2"><i class="fa-solid fa-pen-to-square"></i> Corregir Asistencias</h3>
+                        <p class="text-xs text-emerald-600 mb-3 leading-tight">Accede al módulo de asistencia con privilegios para modificar faltas, retardos o justificaciones del día.</p>
+                        <button onclick="openAttendanceAsAdmin()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-md active:scale-95 text-sm">Entrar a Módulo de Edición</button>
+                    </div>
+
+                    <div>
+                        <h3 class="font-black text-sm text-slate-700 mb-3 flex items-center gap-2"><i class="fa-solid fa-chalkboard-user text-blue-950"></i> Plantilla Docente</h3>
+                        <div id="admin-teacher-list" class="space-y-2 max-h-48 overflow-y-auto no-scrollbar border border-slate-100 rounded-xl p-2 bg-slate-50">
+                            </div>
+                    </div>
+
+                    <div id="admin-only-section" class="hidden border-t border-slate-100 pt-6">
+                        <h3 class="font-black text-sm text-orange-600 mb-3 flex items-center gap-2"><i class="fa-solid fa-user-shield"></i> Zona Administrador (Alumnos)</h3>
+                        <p class="text-xs text-slate-500 mb-3">Selecciona un grupo para dar de alta, baja o importar alumnos desde Excel.</p>
+                        <div class="grid grid-cols-3 gap-2" id="admin-group-container">
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA: ESTADÍSTICAS -->
+        <div id="view-statistics" class="space-y-6 fade-in hidden">
+            <div class="bg-white rounded-[2.5rem] p-6 shadow-xl shadow-blue-900/10 border border-slate-100">
+                <div class="flex items-center justify-between mb-6">
+                    <button onclick="closeStatistics()" class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 active:scale-90 transition-all"><i class="fa-solid fa-arrow-left"></i></button>
+                    <div class="text-right">
+                        <h2 class="text-xl font-black text-slate-800 tracking-tight">Estadísticas</h2>
+                        <span class="bg-blue-100 text-blue-800 text-[9px] font-black px-2 py-1 rounded-md uppercase tracking-wider">Reporte General</span>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Grupo</label>
+                            <div class="relative mt-1">
+                                <select id="stat-group-select" onchange="renderStatistics()" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 font-bold appearance-none text-slate-700 cursor-pointer pr-10">
+                                    </select>
+                                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Fecha</label>
+                            <div class="relative mt-1">
+                                <input type="date" id="stat-date-select" onchange="renderStatistics()" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 font-bold text-slate-700 cursor-pointer text-[13px] uppercase">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-4 mb-4">
+                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex justify-center items-center h-48 relative shadow-inner">
+                            <canvas id="group-chart"></canvas>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-2">Registros</span>
+                                <span id="chart-total-label" class="text-2xl font-black text-blue-950 leading-none">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-4 gap-2" id="stat-summary">
+                            </div>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-2xl border border-slate-100 bg-white shadow-inner">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-[9px] uppercase tracking-widest text-slate-400 border-b border-slate-100">
+                                    <th class="p-3 font-black">Alumno</th>
+                                    <th class="p-3 font-black text-center" title="Asistencias">A</th>
+                                    <th class="p-3 font-black text-center" title="Faltas">F</th>
+                                    <th class="p-3 font-black text-center" title="Retardos">R</th>
+                                    <th class="p-3 font-black text-center" title="Justificados">J</th>
+                                    <th class="p-3 font-black text-center">%</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stat-table-body" class="text-xs">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA: SELECTOR DE LISTA -->
+        <div id="view-selector" class="space-y-6 fade-in hidden">
+            <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-blue-900/10 border border-slate-100">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center gap-3">
+                        <button onclick="goToPortal()" class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 active:scale-90 transition-all mr-2"><i class="fa-solid fa-arrow-left"></i></button>
+                        <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center text-orange-600 shadow-inner">
+                            <i class="fa-solid fa-book-open text-xl"></i>
+                        </div>
+                        <h2 class="text-xl font-black text-slate-800 tracking-tight">Pasar Lista</h2>
+                    </div>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="space-y-3">
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">1. Elegir Grupo Base</label>
+                        <div id="group-container" class="grid grid-cols-3 gap-3">
+                            </div>
+                    </div>
+
+                    <div id="subject-container" class="space-y-3 pt-2 hidden fade-in">
+                        <label id="grade-label" class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">2. Materia</label>
+                        <div class="relative">
+                            <select id="subject-select" onchange="selectSubject(this.value)" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-orange-500 font-bold appearance-none text-slate-700 cursor-pointer pr-10">
+                                </select>
+                            <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="teacher-container" class="space-y-3 pt-2 hidden fade-in">
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">3. Docente a cargo</label>
+                        <div class="space-y-3">
+                            <div class="relative" id="regular-teacher-div">
+                                <select id="teacher-select" onchange="checkStartBtn()" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 font-bold appearance-none text-slate-700 cursor-pointer pr-10">
+                                    <option value="">-- Selecciona tu nombre --</option>
+                                </select>
+                                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                            </div>
+                            <div id="substitute-teacher-div" class="hidden fade-in">
+                                <input type="text" id="substitute-name" oninput="checkStartBtn()" placeholder="Escribe tu nombre (sustituto)..." class="w-full p-4 bg-orange-50 border-2 border-orange-200 rounded-2xl outline-none focus:border-orange-500 font-bold text-orange-900 uppercase transition-all placeholder:text-orange-300">
+                            </div>
+                            <label class="flex items-center gap-2 cursor-pointer ml-2 p-1 w-max">
+                                <input type="checkbox" id="is-substitute" onchange="toggleSubstitute()" class="w-5 h-5 text-orange-600 rounded border-slate-300 focus:ring-orange-500 transition-all">
+                                <span class="text-xs font-bold text-slate-600 hover:text-orange-600 transition-colors">Soy maestro sustituto</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="btn-start" disabled onclick="verifyTeacherPinAndStart()" class="w-full mt-10 bg-slate-200 text-slate-400 font-black py-5 rounded-[2rem] transition-all active:scale-[0.97] flex items-center justify-center gap-3">
+                    Cargar Alumnos <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- VISTA: ASISTENCIA -->
+        <div id="view-attendance" class="space-y-5 slide-in hidden pb-36">
+            <div class="bg-white p-6 rounded-[2rem] shadow-md border border-slate-100 flex flex-col gap-4 relative overflow-hidden">
+                <div id="edit-mode-banner" class="hidden absolute top-0 left-0 right-0 bg-emerald-500 text-white text-[9px] font-black text-center py-1 uppercase tracking-widest z-10">
+                    Modo Edición Privilegiado
+                </div>
+                
+                <div class="flex items-center justify-between mt-2">
+                    <div class="flex items-center gap-4">
+                        <button onclick="closeAttendance()" class="p-3 bg-slate-100 rounded-2xl text-slate-500 active:scale-90 transition-transform">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <h2 id="att-subject" class="text-lg font-black text-blue-950 leading-none mb-1.5 flex items-center">Materia</h2>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase flex items-center gap-1.5 flex-wrap">
+                                <span id="att-group" class="bg-slate-100 px-2 py-0.5 rounded-md text-slate-600">Grupo</span> 
+                                <span id="student-count" class="bg-slate-100 px-2 py-0.5 rounded-md text-slate-600">0 ALUMNOS</span>
+                                <span id="att-teacher" class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md flex items-center gap-1 border border-blue-100"><i class="fa-solid fa-user-tie"></i> Docente</span>
+                            </p>
+                        </div>
+                    </div>
+                    <button id="btn-edit-students" onclick="openManageModal()" class="hidden p-3 bg-blue-50 text-blue-950 rounded-2xl active:scale-90 transition-transform shadow-sm border border-blue-100 flex flex-col items-center justify-center gap-1 hover:bg-blue-100">
+                        <i class="fa-solid fa-users-gear text-lg"></i>
+                        <span class="text-[8px] font-black uppercase tracking-tighter">Editar</span>
+                    </button>
+                </div>
+                
+                <div class="flex items-center justify-between bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Progreso</span>
+                        <span id="progress-text" class="text-sm font-bold text-blue-950">0 / 0</span>
+                    </div>
+                    <button onclick="markAllPresent()" class="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl text-xs font-black shadow-sm active:scale-95 transition-all flex items-center gap-2 hover:bg-emerald-200">
+                        <i class="fa-solid fa-check-double text-lg"></i> Todos Presentes
+                    </button>
+                </div>
+            </div>
+
+            <div class="relative group">
+                <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 transition-colors"></i>
+                <input type="text" oninput="handleSearch(event)" placeholder="Buscar por nombre..." class="w-full pl-12 pr-6 py-5 rounded-[2rem] border-none shadow-lg focus:ring-4 focus:ring-orange-100 bg-white font-bold text-sm outline-none transition-all placeholder:text-slate-300">
+            </div>
+
+            <div id="student-list" class="space-y-4"></div>
+
+            <div class="fixed bottom-8 left-4 right-4 z-50 max-w-md mx-auto">
+                <button id="btn-save" onclick="saveAndSendAttendance()" class="w-full bg-slate-900 text-white font-black py-6 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] flex items-center justify-center gap-4 active:scale-95 transition-all">
+                    <div class="bg-orange-500 p-1.5 rounded-lg"><i class="fa-solid fa-floppy-disk"></i></div>
+                    <span id="btn-save-text">ENVIAR AL DIRECTOR</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- VISTA: ÉXITO -->
+        <div id="view-success" class="flex flex-col items-center justify-center min-h-[75vh] text-center space-y-8 fade-in hidden">
+            <div class="relative">
+                <div class="w-32 h-32 bg-emerald-100 text-emerald-600 rounded-[3rem] flex items-center justify-center shadow-2xl shadow-emerald-200">
+                    <i class="fa-solid fa-check text-5xl"></i>
+                </div>
+                <div class="absolute -top-2 -right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-cloud-arrow-up text-orange-600"></i>
+                </div>
+            </div>
+            <div class="space-y-3 px-6">
+                <h2 class="text-3xl font-black text-slate-900 italic">¡LOGRADO!</h2>
+                <p class="text-slate-500 font-bold leading-relaxed uppercase text-xs tracking-widest">
+                    Los registros se han guardado exitosamente.
+                </p>
+            </div>
+            <button onclick="goToPortal()" class="bg-blue-950 hover:bg-blue-900 text-white px-12 py-5 rounded-[2rem] font-black shadow-xl shadow-blue-900/30 transition-all active:scale-95">
+                VOLVER AL PORTAL
+            </button>
+        </div>
+
+        <!-- MODALES -->
+        <div id="modal-login" class="fixed inset-0 bg-slate-900/80 z-[100] hidden flex justify-center items-center px-4 fade-in">
+            <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl relative text-center">
+                <button onclick="closeModal('modal-login')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full active:scale-90 transition-all"><i class="fa-solid fa-xmark"></i></button>
+                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 mx-auto mb-4">
+                    <i class="fa-solid fa-lock text-2xl"></i>
+                </div>
+                <h3 class="font-black text-slate-800 text-xl mb-1">Acceso Restringido</h3>
+                <p id="login-role-text" class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6">Perfil</p>
+                <input type="password" id="login-password" placeholder="Ingresa la contraseña..." class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 text-center font-bold outline-none focus:border-blue-500 transition-all tracking-widest mb-4">
+                <p id="login-error" class="text-red-500 text-xs font-bold hidden mb-4">Contraseña incorrecta</p>
+                <button onclick="verifyLogin()" class="w-full py-4 bg-blue-950 text-white font-black rounded-2xl active:scale-95 transition-all shadow-lg">Entrar</button>
+            </div>
+        </div>
+
+        <div id="modal-incident" class="fixed inset-0 bg-slate-900/80 z-[100] hidden flex justify-center items-center px-4 fade-in">
+            <div class="bg-white w-full max-w-sm rounded-[2rem] p-6 shadow-2xl relative">
+                <button onclick="closeModal('modal-incident')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div>
+                        <h3 class="font-black text-slate-800">Reportar Incidencia</h3>
+                        <p id="modal-student-name" class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Nombre del alumno</p>
+                    </div>
+                </div>
+                <textarea id="incident-text" rows="4" class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 text-sm font-medium outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all resize-none" placeholder="Describe el reporte o incidencia de la clase..."></textarea>
+                <div class="mt-6 flex gap-3">
+                    <button onclick="clearIncident()" class="flex-1 py-4 bg-slate-100 text-slate-500 font-bold rounded-2xl active:scale-95 transition-all text-xs">Borrar</button>
+                    <button onclick="saveIncident()" class="flex-[2] py-4 bg-amber-500 text-white font-black rounded-2xl active:scale-95 transition-all shadow-lg shadow-amber-200 text-sm">Guardar Reporte</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-manage" class="fixed inset-0 bg-slate-900/80 z-[100] hidden flex justify-center items-end sm:items-center px-4 fade-in pb-4 sm:pb-0">
+            <div class="bg-white w-full max-w-md rounded-[2.5rem] p-6 shadow-2xl relative max-h-[85vh] flex flex-col">
+                <button onclick="closeManageModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full active:scale-90 transition-all"><i class="fa-solid fa-xmark"></i></button>
+                <div class="flex items-center gap-3 mb-6 pr-8">
+                    <div class="w-10 h-10 bg-blue-100 text-blue-950 rounded-xl flex items-center justify-center shadow-inner flex-shrink-0"><i class="fa-solid fa-users-gear"></i></div>
+                    <div>
+                        <h3 class="font-black text-slate-800 text-lg leading-tight">Configurar Lista</h3>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Lista: <span id="manage-group-name" class="text-orange-600"></span> • <span id="manage-count">0</span></p>
+                    </div>
+                </div>
+                
+                <div id="custom-subject-help-text" class="hidden mb-3 p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-800">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Estás editando una lista <b>exclusiva para esta materia personalizada</b>. Elimina a los alumnos que no asistan o agrega de otros grupos copiando desde Excel. No afectarás la lista original del grupo base.
+                </div>
+
+                <div class="flex gap-2 mb-1">
+                    <input type="text" id="new-student-input" placeholder="Ej. PÉREZ RUIZ ANA..." class="flex-1 bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 text-sm font-bold outline-none focus:border-blue-500 transition-all uppercase placeholder:normal-case">
+                    <button onclick="addSingleStudent()" class="bg-blue-950 text-white px-5 py-3 rounded-2xl font-black active:scale-95 transition-all shadow-md"><i class="fa-solid fa-plus"></i></button>
+                </div>
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-4 ml-2">Formato: Paterno - Materno - Nombre(s)</p>
+                
+                <button onclick="toggleExcelImport()" class="w-full py-3 mb-4 bg-emerald-50 text-emerald-700 font-bold text-xs rounded-2xl border border-emerald-100 active:scale-95 transition-all flex items-center justify-center gap-2 hover:bg-emerald-100">
+                    <i class="fa-solid fa-file-excel text-emerald-600 text-lg"></i> Pegar lista desde Excel
+                </button>
+                
+                <div id="excel-import-section" class="hidden mb-4 bg-slate-50 p-3 rounded-2xl border border-slate-200 fade-in">
+                    <textarea id="excel-textarea" rows="4" class="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-medium outline-none focus:border-emerald-500 transition-all resize-none uppercase" placeholder="Pega aquí tu lista..."></textarea>
+                    <div class="mt-2 flex justify-end gap-2">
+                        <button onclick="toggleExcelImport()" class="px-4 py-2 bg-slate-200 text-slate-600 font-bold text-xs rounded-xl active:scale-95">Cancelar</button>
+                        <button id="btn-import-excel" onclick="importFromExcel()" class="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl active:scale-95 shadow-md flex items-center gap-2">
+                            <i class="fa-solid fa-check"></i> Importar Nombres
+                        </button>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto no-scrollbar border-t border-slate-100 pt-4 space-y-2" id="manage-student-list"></div>
+            </div>
+        </div>
+
+        <div id="modal-student-detail" class="fixed inset-0 bg-slate-900/80 z-[150] hidden flex justify-center items-end sm:items-center px-4 fade-in pb-4 sm:pb-0">
+            <div class="bg-white w-full max-w-md rounded-[2.5rem] p-6 shadow-2xl relative max-h-[85vh] flex flex-col">
+                <button onclick="closeModal('modal-student-detail')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full active:scale-90 transition-all"><i class="fa-solid fa-xmark"></i></button>
+                
+                <div class="flex items-center gap-3 mb-6 pr-8">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-950 rounded-2xl flex items-center justify-center shadow-inner flex-shrink-0">
+                        <i class="fa-solid fa-user-graduate text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-slate-800 text-sm leading-tight tracking-tight uppercase" id="detail-student-name">Nombre</h3>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Reporte Diario • <span id="detail-date" class="text-orange-600">Hoy</span></p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 mb-4 overflow-y-auto max-h-[50vh] no-scrollbar">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 text-center">Desglose de Módulos</h4>
+                    <div id="daily-timeline" class="space-y-4 relative before:absolute before:inset-0 before:ml-4 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                        </div>
+                </div>
+                
+                <button onclick="closeModal('modal-student-detail')" class="w-full bg-blue-950 text-white font-black py-4 rounded-2xl active:scale-95 transition-all shadow-md mt-auto">Cerrar Reporte</button>
+            </div>
+        </div>
+
+        <div id="modal-custom-dialog" class="fixed inset-0 bg-slate-900/80 z-[200] hidden flex justify-center items-center px-4 fade-in">
+            <div class="bg-white w-full max-w-sm rounded-[2rem] p-6 shadow-2xl relative">
+                <h3 id="dialog-title" class="font-black text-slate-800 text-lg mb-2">Atención</h3>
+                <p id="dialog-message" class="text-sm text-slate-600 mb-4 leading-relaxed"></p>
+                <input type="text" id="dialog-input" class="hidden w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 text-sm font-bold outline-none focus:border-blue-500 uppercase mb-4">
+                <div class="flex justify-end gap-3 mt-4" id="dialog-buttons">
+                    <button id="btn-dialog-cancel" class="hidden px-4 py-3 bg-slate-100 text-slate-500 font-bold rounded-xl active:scale-95 transition-all text-sm w-1/2">Cancelar</button>
+                    <button id="btn-dialog-confirm" class="px-4 py-3 bg-blue-950 text-white font-black rounded-xl active:scale-95 transition-all shadow-lg text-sm w-1/2">Aceptar</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="w-full text-center py-6 mt-auto bg-transparent">
+        <div class="max-w-md mx-auto px-4 border-t border-blue-900/10 pt-4">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
+                <i class="fa-solid fa-copyright"></i> Propiedad Colegio Gran Bretaña<br>
+                <span class="text-blue-900">Departamento de Innovación Tecnológica CGB</span><br>
+                <span class="text-[8px] text-slate-500 normal-case tracking-normal">by L.I.E. ARTURO PALACIOS GONZALEZ</span>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // --- CONEXIÓN A GOOGLE DRIVE ---
+        // ⚠️ PEGA AQUÍ LA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT:
+        const GOOGLE_APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwkAWAoHvkrgDL-sWFsOXE_rcGobqxPq1j1v_xCH7yGruLAXbLC-u0gt1d36tv1yG7F/exec';
+
+        // --- BASE DE DATOS Y ESTADO GLOBAL ---
+        let GLOBAL_SCHOOL_YEAR = '2024 - 2025';
+        let currentRole = 'guest'; 
+        let pendingLoginRole = '';
+        
+        const PASSWORDS = {
+            'direccion': 'direccion2026',
+            'admin': 'arturo2026'
+        };
+
+        const groups = ['1° A', '1° B', '1° C', '2° A', '2° B', '2° C', '3° A', '3° B', '3° C'];
+        
+        const subjectsByGrade = {
+            '1': ['Español 1', 'Formación Cívica y Ética 1', 'Geografía', 'Historia 1', 'Educación Física 1', 'Matemáticas 1', 'Tecnología 1', 'Tutoría 1', 'Laboratorio de Biología 1'],
+            '2': ['Español 2', 'Matemáticas 2', 'Lab de Física', 'Física', 'Tutoría 2', 'Tecnología 2', 'Historia 2', 'Sustentabilidad', 'Formación Cívica 2'],
+            '3': ['Matemáticas 3', 'Educación Física 3', 'Historia 3', 'Tecnología 3', 'Química', 'Español 3', 'Formación Cívica 3', 'Tutoría 3', 'Francés', 'Laboratorio de Química']
+        };
+
+        let customSubjectsByGrade = { '1': [], '2': [], '3': [] };
+
+        let studentsDB = {
+            '1° A': [
+                {id: 101, n: 'AGUILAR HERNÁNDEZ SANTIAGO'},
+                {id: 102, n: 'ÁLVAREZ LÓPEZ MARÍA FERNANDA'},
+                {id: 103, n: 'BAUTISTA RAMÍREZ EMILIANO'},
+                {id: 104, n: 'CARMONA RUIZ VALERIA'},
+                {id: 105, n: 'CASTILLO MENDOZA DIEGO'},
+                {id: 106, n: 'CRUZ VÁZQUEZ ANA SOFÍA'},
+                {id: 107, n: 'DÍAZ FLORES LEONARDO'},
+                {id: 108, n: 'DOMÍNGUEZ PÉREZ CAMILA'},
+                {id: 109, n: 'ESTRADA GÓMEZ ALEJANDRO'},
+                {id: 110, n: 'FERNÁNDEZ JIMÉNEZ DANIELA'},
+                {id: 111, n: 'GARCÍA TORRES MATEO'},
+                {id: 112, n: 'GÓMEZ REYES ISABELLA'},
+                {id: 113, n: 'GONZÁLEZ MORALES SEBASTIÁN'},
+                {id: 114, n: 'HERNÁNDEZ CRUZ VALENTINA'},
+                {id: 115, n: 'JIMÉNEZ ORTIZ NICOLÁS'},
+                {id: 116, n: 'LÓPEZ GUTIÉRREZ RENATA'},
+                {id: 117, n: 'MARTÍNEZ SÁNCHEZ MATÍAS'},
+                {id: 118, n: 'MEDINA CHÁVEZ XIMENA'},
+                {id: 119, n: 'MENDOZA CASTRO LUIS ÁNGEL'},
+                {id: 120, n: 'ORTIZ NAVARRO VICTORIA'},
+                {id: 121, n: 'PÉREZ DÍAZ GAEL'},
+                {id: 122, n: 'RAMÍREZ ÁLVAREZ ROMINA'},
+                {id: 123, n: 'RODRÍGUEZ ROMERO MAXIMILIANO'},
+                {id: 124, n: 'SÁNCHEZ HERRERA SOFÍA'},
+                {id: 125, n: 'VARGAS LUNA DANIEL'}
+            ],
+            '2° B': [{id: 201, n: 'ALFEREZ BETANCOURT PAULA MICHELLE'}, {id: 202, n: 'AVILA FERNANDEZ MARIA JOSE'}, {id: 203, n: 'CENOBIO HERNANDEZ KAIRI ANDREA'}],
+            '3° C': [{id: 301, n: 'AGUILERA CARRO ITZAE'}, {id: 302, n: 'ANDRADE JIMENEZ MARIO'}],
+            '3° A': [{id: 401, n: 'AGUILAR GALLEGOS STEPHANIE MAITE'}]
+        };
+
+        let customSubjectGroups = {};
+
+        let teachersDB = [
+            { name: 'PROFA. MARÍA ELENA', pin: '1234' },
+            { name: 'PROF. ROBERTO CARLOS', pin: '5678' }
+        ];
+
+        let mockStats = {};
+        let selectedGroup = '';
+        let selectedSubject = '';
+        let currentTeacher = '';
+        let isCovering = false;
+        let attendanceData = {};
+        let incidentData = {};
+        let currentIncidentStudentId = null;
+        let searchTerm = '';
+        let currentEditingTarget = null; 
+        let groupChartInstance = null; 
+
+        // --- SISTEMA DE DIÁLOGOS PERSONALIZADOS ---
+        function showCustomDialog(options) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('modal-custom-dialog');
+                const titleEl = document.getElementById('dialog-title');
+                const msgEl = document.getElementById('dialog-message');
+                const inputEl = document.getElementById('dialog-input');
+                const btnCancel = document.getElementById('btn-dialog-cancel');
+                const btnConfirm = document.getElementById('btn-dialog-confirm');
+
+                titleEl.innerText = options.title || 'Aviso';
+                msgEl.innerText = options.message || '';
+
+                if (options.type === 'prompt') {
+                    inputEl.classList.remove('hidden');
+                    inputEl.type = options.inputType || 'text';
+                    inputEl.value = options.defaultValue || '';
+                    inputEl.placeholder = options.placeholder || '';
+                    inputEl.focus();
+                } else {
+                    inputEl.classList.add('hidden');
+                }
+
+                if (options.type === 'confirm' || options.type === 'prompt') {
+                    btnCancel.classList.remove('hidden');
+                    btnConfirm.classList.replace('w-full', 'w-1/2');
+                } else {
+                    btnCancel.classList.add('hidden');
+                    btnConfirm.classList.replace('w-1/2', 'w-full');
+                }
+
+                btnConfirm.replaceWith(btnConfirm.cloneNode(true));
+                btnCancel.replaceWith(btnCancel.cloneNode(true));
+                const newBtnConfirm = document.getElementById('btn-dialog-confirm');
+                const newBtnCancel = document.getElementById('btn-dialog-cancel');
+
+                newBtnConfirm.onclick = () => {
+                    modal.classList.add('hidden');
+                    resolve(options.type === 'prompt' ? inputEl.value : true);
+                };
+
+                newBtnCancel.onclick = () => {
+                    modal.classList.add('hidden');
+                    resolve(options.type === 'prompt' ? null : false);
+                };
+
+                modal.classList.remove('hidden');
+            });
+        }
+
+        // --- INICIALIZACIÓN ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateStr = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+            const currentDateEl = document.getElementById('current-date');
+            if (currentDateEl) currentDateEl.innerText = dateStr;
+            
+            updateSchoolYearDisplay();
+            
+            const groupHtml = groups.map(g => {
+                const safeId = g.replace('° ', '-');
+                return `<button onclick="selectGroup('${g}', '${safeId}')" id="btn-group-${safeId}" class="group-btn py-4 flex flex-col items-center justify-center gap-2 rounded-2xl text-sm font-black border-2 bg-slate-50 border-slate-50 text-slate-500 hover:border-slate-200 transition-all active:scale-95">
+                    <i class="fa-solid fa-dragon text-xl opacity-60"></i>${g}
+                </button>`;
+            }).join('');
+            
+            const groupContainer = document.getElementById('group-container');
+            if (groupContainer) groupContainer.innerHTML = groupHtml;
+
+            const adminGroupHtml = groups.map(g => {
+                return `<button onclick="openManageModalFromAdmin('${g}')" class="py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:border-orange-400 hover:text-orange-600 transition-all active:scale-95">${g}</button>`;
+            }).join('');
+            
+            const adminGroupContainer = document.getElementById('admin-group-container');
+            if (adminGroupContainer) adminGroupContainer.innerHTML = adminGroupHtml;
+
+            refreshTeacherDropdowns();
+            generateMockStats(); 
+        });
+
+        function generateMockStats() {
+            Object.keys(studentsDB).forEach(group => {
+                studentsDB[group].forEach(student => {
+                    if (!mockStats[student.id]) {
+                        const totalClasses = 30; 
+                        const f = Math.floor(Math.random() * 4); 
+                        const r = Math.floor(Math.random() * 3); 
+                        const j = Math.floor(Math.random() * 2); 
+                        const a = totalClasses - f - r - j;
+                        mockStats[student.id] = { a, f, r, j, total: totalClasses };
+                    }
+                });
+            });
+        }
+
+        // --- NAVEGACIÓN Y PORTAL ---
+        function hideAllViews() {
+            ['view-portal', 'view-register', 'view-admin', 'view-selector', 'view-attendance', 'view-success', 'view-statistics'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.classList.add('hidden');
+            });
+        }
+
+        function goToPortal() {
+            currentRole = 'guest';
+            hideAllViews();
+            
+            document.getElementById('view-portal')?.classList.remove('hidden');
+            
+            selectedGroup = ''; selectedSubject = ''; currentTeacher = ''; isCovering = false; attendanceData = {}; incidentData = {};
+            
+            document.getElementById('subject-container')?.classList.add('hidden');
+            document.getElementById('teacher-container')?.classList.add('hidden');
+        }
+
+        // --- FUNCIONES MAESTRO ---
+        function openTeacherFlow() {
+            currentRole = 'teacher';
+            refreshTeacherDropdowns();
+            hideAllViews();
+            
+            document.getElementById('view-selector')?.classList.remove('hidden');
+            document.getElementById('btn-edit-students')?.classList.add('hidden'); 
+            document.getElementById('edit-mode-banner')?.classList.add('hidden');
+            
+            const btnSaveText = document.getElementById('btn-save-text');
+            if (btnSaveText) btnSaveText.innerText = "ENVIAR AL DIRECTOR";
+            
+            const btnStart = document.getElementById('btn-start');
+            if (btnStart) btnStart.onclick = verifyTeacherPinAndStart;
+        }
+
+        function openTeacherRegistration() {
+            hideAllViews();
+            
+            const nameInput = document.getElementById('new-teacher-name');
+            if(nameInput) nameInput.value = '';
+            
+            const pinInput = document.getElementById('new-teacher-pin');
+            if(pinInput) pinInput.value = '';
+
+            document.getElementById('view-register')?.classList.remove('hidden');
+        }
+
+        async function registerTeacher() {
+            const input = document.getElementById('new-teacher-name');
+            const pinInput = document.getElementById('new-teacher-pin');
+            let name = input ? input.value.trim().toUpperCase() : '';
+            let pin = pinInput ? pinInput.value.trim() : '';
+            
+            if (!name || !pin) { await showCustomDialog({ type: 'alert', message: 'Por favor, ingresa tu nombre y un NIP de 4 dígitos.' }); return; }
+            if (!/^\d{4}$/.test(pin)) { await showCustomDialog({ type: 'alert', message: 'El NIP debe ser exactamente de 4 números enteros.' }); return; }
+            if (!name.startsWith("PROF")) { name = "PROF. " + name; }
+            
+            if (!teachersDB.find(t => t.name === name)) {
+                teachersDB.push({ name: name, pin: pin });
+                await showCustomDialog({ type: 'alert', title: '¡Éxito!', message: `El docente ${name} ha sido registrado correctamente.` });
+                goToPortal();
+            } else {
+                await showCustomDialog({ type: 'alert', message: "Este nombre ya está registrado en el sistema." });
+            }
+        }
+
+        function refreshTeacherDropdowns() {
+            const selects = [document.getElementById('teacher-select')];
+            const sortedTeachers = teachersDB.sort((a, b) => a.name.localeCompare(b.name, 'es-MX', { sensitivity: 'base' }));
+            selects.forEach(select => {
+                if(select) select.innerHTML = '<option value="">-- Selecciona tu nombre --</option>' + sortedTeachers.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
+            });
+            renderAdminTeacherList();
+        }
+
+        // --- SEGURIDAD Y LOGIN ---
+        function promptLogin(role) {
+            pendingLoginRole = role;
+            
+            const roleText = document.getElementById('login-role-text');
+            if (roleText) roleText.innerText = role === 'admin' ? 'ADMINISTRADOR DEL SISTEMA' : 'DIRECCIÓN ESCOLAR';
+            
+            const pwdInput = document.getElementById('login-password');
+            if (pwdInput) pwdInput.value = '';
+            
+            document.getElementById('login-error')?.classList.add('hidden');
+            document.getElementById('modal-login')?.classList.remove('hidden');
+        }
+
+        function verifyLogin() {
+            const pwdInput = document.getElementById('login-password');
+            const pass = pwdInput ? pwdInput.value : '';
+            
+            if (pass === PASSWORDS[pendingLoginRole]) {
+                currentRole = pendingLoginRole;
+                closeModal('modal-login');
+                loadAdminDashboard();
+            } else {
+                document.getElementById('login-error')?.classList.remove('hidden');
+            }
+        }
+
+        function loadAdminDashboard() {
+            hideAllViews();
+            document.getElementById('view-admin')?.classList.remove('hidden');
+            
+            const schoolYearInput = document.getElementById('input-school-year');
+            if (schoolYearInput) schoolYearInput.value = GLOBAL_SCHOOL_YEAR;
+            
+            const title = document.getElementById('admin-panel-title');
+            const roleBadge = document.getElementById('admin-panel-role');
+            const adminOnlySec = document.getElementById('admin-only-section');
+            
+            if (currentRole === 'admin') {
+                if (title) title.innerText = 'Panel de Control Principal';
+                if (roleBadge) {
+                    roleBadge.innerText = 'Lic. Arturo (Admin)';
+                    roleBadge.className = 'bg-slate-900 text-orange-400 text-[9px] font-black px-2 py-1 rounded-md uppercase tracking-wider';
+                }
+                adminOnlySec?.classList.remove('hidden'); 
+            } else {
+                if (title) title.innerText = 'Gestión Directiva';
+                if (roleBadge) {
+                    roleBadge.innerText = 'Dirección';
+                    roleBadge.className = 'bg-blue-100 text-blue-800 text-[9px] font-black px-2 py-1 rounded-md uppercase tracking-wider';
+                }
+                adminOnlySec?.classList.add('hidden');
+            }
+            renderAdminTeacherList();
+        }
+
+        async function saveSchoolYear() {
+            const input = document.getElementById('input-school-year');
+            if (input) GLOBAL_SCHOOL_YEAR = input.value.trim();
+            
+            updateSchoolYearDisplay();
+            await showCustomDialog({ type: 'alert', title: 'Actualizado', message: "Ciclo escolar actualizado correctamente." });
+        }
+
+        function updateSchoolYearDisplay() {
+            const navText = document.getElementById('nav-school-year');
+            if (navText) navText.innerText = "Ciclo " + GLOBAL_SCHOOL_YEAR;
+        }
+
+        function renderAdminTeacherList() {
+            const container = document.getElementById('admin-teacher-list');
+            if(!container) return;
+            const sortedTeachers = teachersDB.sort((a, b) => a.name.localeCompare(b.name, 'es-MX', { sensitivity: 'base' }));
+            container.innerHTML = sortedTeachers.map(t => `
+                <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                    <div>
+                        <span class="text-xs font-bold text-slate-700 block">${t.name}</span>
+                        <span class="text-[10px] font-black text-orange-600">NIP: ${t.pin}</span>
+                    </div>
+                    <div class="flex gap-1">
+                        <button onclick="resetTeacherPin('${t.name}')" class="text-blue-400 bg-blue-50 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-blue-500 hover:text-white active:scale-90 transition-all" title="Cambiar NIP"><i class="fa-solid fa-key"></i></button>
+                        <button onclick="removeTeacher('${t.name}')" class="text-red-400 bg-red-50 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-500 hover:text-white active:scale-90 transition-all" title="Eliminar"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function removeTeacher(name) {
+            const confirmed = await showCustomDialog({ 
+                type: 'confirm', 
+                title: 'Eliminar Docente', 
+                message: `¿Estás seguro de dar de baja al docente:\n${name}?` 
+            });
+            if(confirmed) {
+                teachersDB = teachersDB.filter(t => t.name !== name);
+                refreshTeacherDropdowns();
+            }
+        }
+
+        async function resetTeacherPin(name) {
+            const newPin = await showCustomDialog({
+                type: 'prompt',
+                inputType: 'text',
+                title: 'Resetear NIP',
+                message: `Ingresa el nuevo NIP de 4 dígitos para:\n${name}`,
+                placeholder: 'Ej. 1234'
+            });
+
+            if (newPin !== null) {
+                if (/^\d{4}$/.test(newPin.trim())) {
+                    const teacher = teachersDB.find(t => t.name === name);
+                    if (teacher) {
+                        teacher.pin = newPin.trim();
+                        renderAdminTeacherList();
+                        await showCustomDialog({ type: 'alert', title: 'Actualizado', message: `El NIP de ${name} se actualizó a: ${teacher.pin}` });
+                    }
+                } else {
+                    await showCustomDialog({ type: 'alert', message: 'El NIP debe ser exactamente de 4 números. Intenta de nuevo.' });
+                }
+            }
+        }
+
+        function openAttendanceAsAdmin() {
+            hideAllViews();
+            document.getElementById('view-selector')?.classList.remove('hidden');
+            document.getElementById('teacher-container')?.classList.add('hidden');
+            
+            const btnStart = document.getElementById('btn-start');
+            if (btnStart) {
+                btnStart.disabled = false;
+                btnStart.className = "w-full mt-10 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-5 rounded-[2rem] shadow-2xl transition-all active:scale-[0.97] flex items-center justify-center gap-3";
+                btnStart.innerHTML = 'Corregir Registros <i class="fa-solid fa-pen-to-square"></i>';
+                btnStart.onclick = function() { openAttendance(true); };
+            }
+        }
+
+        // --- TABLERO DE ESTADÍSTICAS ---
+        function openStatistics() {
+            hideAllViews();
+            document.getElementById('view-statistics')?.classList.remove('hidden');
+            
+            const groupSelect = document.getElementById('stat-group-select');
+            if (groupSelect) {
+                groupSelect.innerHTML = groups.map(g => `<option value="${g}">${g}</option>`).join('');
+                groupSelect.value = groups[0]; 
+            }
+            
+            const dateInput = document.getElementById('stat-date-select');
+            if (dateInput && !dateInput.value) {
+                const local = new Date();
+                local.setMinutes(local.getMinutes() - local.getTimezoneOffset());
+                dateInput.value = local.toISOString().slice(0,10);
+            }
+            
+            renderStatistics();
+        }
+
+        function closeStatistics() {
+            hideAllViews();
+            document.getElementById('view-admin')?.classList.remove('hidden');
+        }
+
+        function renderStatistics() {
+            const groupSelect = document.getElementById('stat-group-select');
+            const group = groupSelect ? groupSelect.value : '';
+            const students = studentsDB[group] || [];
+            
+            let html = '';
+            let groupA = 0, groupF = 0, groupR = 0, groupJ = 0;
+
+            students.sort((a, b) => a.n.localeCompare(b.n, 'es-MX', { sensitivity: 'base' })).forEach(s => {
+                const st = mockStats[s.id] || { a:0, f:0, r:0, j:0, total:0 };
+                groupA += st.a; groupF += st.f; groupR += st.r; groupJ += st.j;
+                
+                const attendancePercentage = st.total > 0 ? Math.round(((st.a + st.r + st.j) / st.total) * 100) : 0;
+                
+                let pctColor = 'text-emerald-700 bg-emerald-100 border border-emerald-200'; 
+                if (attendancePercentage < 90 && attendancePercentage >= 80) pctColor = 'text-amber-700 bg-amber-100 border border-amber-200'; 
+                if (attendancePercentage < 80) pctColor = 'text-red-700 bg-red-100 border border-red-200'; 
+
+                html += `
+                    <tr onclick="openStudentDailyDetail(${s.id}, '${s.n}', '${group}')" class="border-b border-slate-100 hover:bg-blue-50 transition-colors cursor-pointer group">
+                        <td class="p-3 font-bold text-slate-700 whitespace-nowrap max-w-[150px] truncate group-hover:text-blue-600" title="${s.n}">
+                            ${s.n} <i class="fa-solid fa-magnifying-glass text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity ml-1"></i>
+                        </td>
+                        <td class="p-3 text-center font-bold text-emerald-600">${st.a}</td>
+                        <td class="p-3 text-center font-bold text-red-500">${st.f}</td>
+                        <td class="p-3 text-center font-bold text-amber-500">${st.r}</td>
+                        <td class="p-3 text-center font-bold text-blue-500">${st.j}</td>
+                        <td class="p-3 text-center">
+                            <span class="px-2 py-1 rounded-md font-black ${pctColor}">${attendancePercentage}%</span>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            const tbody = document.getElementById('stat-table-body');
+            if (tbody) tbody.innerHTML = html || '<tr><td colspan="6" class="p-4 text-center text-slate-400 font-bold">No hay alumnos en este grupo</td></tr>';
+
+            const statSummary = document.getElementById('stat-summary');
+            if (statSummary) {
+                statSummary.innerHTML = `
+                    <div class="bg-emerald-50 p-2 rounded-xl text-center border border-emerald-100 shadow-sm"><p class="text-[9px] font-black text-emerald-600 uppercase tracking-tighter mb-0.5">Asist.</p><p class="font-black text-emerald-700 text-lg leading-none">${groupA}</p></div>
+                    <div class="bg-red-50 p-2 rounded-xl text-center border border-red-100 shadow-sm"><p class="text-[9px] font-black text-red-600 uppercase tracking-tighter mb-0.5">Faltas</p><p class="font-black text-red-700 text-lg leading-none">${groupF}</p></div>
+                    <div class="bg-amber-50 p-2 rounded-xl text-center border border-amber-100 shadow-sm"><p class="text-[9px] font-black text-amber-600 uppercase tracking-tighter mb-0.5">Retar.</p><p class="font-black text-amber-700 text-lg leading-none">${groupR}</p></div>
+                    <div class="bg-blue-50 p-2 rounded-xl text-center border border-blue-100 shadow-sm"><p class="text-[9px] font-black text-blue-600 uppercase tracking-tighter mb-0.5">Justif.</p><p class="font-black text-blue-700 text-lg leading-none">${groupJ}</p></div>
+                `;
+            }
+
+            const totalRegistros = groupA + groupF + groupR + groupJ;
+            const totalLabel = document.getElementById('chart-total-label');
+            if (totalLabel) totalLabel.innerText = totalRegistros;
+            
+            const chartCanvas = document.getElementById('group-chart');
+            if (chartCanvas) {
+                const ctx = chartCanvas.getContext('2d');
+                if (groupChartInstance) groupChartInstance.destroy();
+                
+                groupChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Asistencias', 'Faltas', 'Retardos', 'Justificados'],
+                        datasets: [{
+                            data: [groupA, groupF, groupR, groupJ],
+                            backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6'],
+                            borderWidth: 0,
+                            hoverOffset: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '75%',
+                        plugins: { legend: { display: false }, tooltip: { bodyFont: { family: 'sans-serif', weight: 'bold' }, padding: 10, cornerRadius: 10, displayColors: true } },
+                        animation: { animateScale: true, animateRotate: true }
+                    }
+                });
+            }
+        }
+
+        function openStudentDailyDetail(id, name, group) {
+            const studentNameEl = document.getElementById('detail-student-name');
+            if(studentNameEl) studentNameEl.innerText = name;
+            
+            const dateInput = document.getElementById('stat-date-select');
+            const selectedDateStr = dateInput ? dateInput.value : '';
+            const dateObj = new Date(selectedDateStr + 'T12:00:00'); 
+            const prettyDate = dateObj.toLocaleDateString('es-MX', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+            
+            const detailDate = document.getElementById('detail-date');
+            if(detailDate) detailDate.innerText = prettyDate;
+            
+            const grade = group.charAt(0);
+            const todaySubjects = (subjectsByGrade[grade] || []).slice(0, 7); 
+            const timeSlots = ['07:00 AM', '07:50 AM', '08:40 AM', '10:00 AM', '10:50 AM', '11:40 AM', '12:30 PM'];
+            const options = ['A', 'A', 'A', 'A', 'A', 'F', 'R', 'J']; 
+            
+            let timelineHtml = '';
+            
+            todaySubjects.forEach((sub, index) => {
+                const stat = options[Math.floor(Math.random() * options.length)]; 
+                let icon = ''; let colorClass = ''; let text = '';
+                if(stat === 'A') { icon = 'fa-check'; colorClass = 'bg-emerald-100 text-emerald-600 border-emerald-300'; text = 'Presente'; }
+                if(stat === 'F') { icon = 'fa-xmark'; colorClass = 'bg-red-100 text-red-600 border-red-300'; text = 'Falta'; }
+                if(stat === 'R') { icon = 'fa-clock'; colorClass = 'bg-amber-100 text-amber-600 border-amber-300'; text = 'Retardo'; }
+                if(stat === 'J') { icon = 'fa-file-lines'; colorClass = 'bg-blue-100 text-blue-600 border-blue-300'; text = 'Justificado'; }
+
+                timelineHtml += `
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-8 h-8 rounded-full border-2 border-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 ${colorClass} z-10">
+                        <i class="fa-solid ${icon} text-[10px]"></i>
+                    </div>
+                    <div class="w-[calc(100%-3rem)] md:w-[calc(50%-1.5rem)] p-3 rounded-2xl bg-white shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-black text-slate-700 text-[11px] uppercase tracking-tight">${sub}</span>
+                            <span class="text-[9px] font-bold text-slate-400"><i class="fa-regular fa-clock"></i> ${timeSlots[index] || 'Hora'}</span>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider ${colorClass.replace('bg-', 'text-').replace('border-', 'text-')}">${text}</span>
+                    </div>
+                </div>
+                `;
+            });
+            
+            const timeline = document.getElementById('daily-timeline');
+            if (timeline) timeline.innerHTML = timelineHtml;
+            
+            document.getElementById('modal-student-detail')?.classList.remove('hidden');
+        }
+
+        // --- FUNCIONES CORE DE ASISTENCIA ---
+        function renderSubjectSelect(grade) {
+            const baseSubjects = subjectsByGrade[grade] || [];
+            const customSubjects = customSubjectsByGrade[grade] || [];
+            
+            let html = `<option value="">-- Elige materia --</option>`;
+            baseSubjects.forEach(s => html += `<option value="${s}">${s}</option>`);
+            
+            if (customSubjects.length > 0) {
+                html += `<optgroup label="Materias Personalizadas">`;
+                customSubjects.forEach(s => html += `<option value="${s}">${s}</option>`);
+                html += `</optgroup>`;
+            }
+            html += `<option value="ADD_NEW" class="font-black text-orange-600">➕ Crear nueva materia...</option>`;
+            
+            const subjectSelect = document.getElementById('subject-select');
+            if(subjectSelect) subjectSelect.innerHTML = html;
+        }
+
+        function selectGroup(g, id) {
+            selectedGroup = g;
+            document.querySelectorAll('.group-btn').forEach(b => { b.className = 'group-btn py-4 flex flex-col items-center justify-center gap-2 rounded-2xl text-sm font-black border-2 bg-slate-50 border-slate-50 text-slate-500 hover:border-slate-200 transition-all active:scale-95'; });
+            
+            const btnGroup = document.getElementById(`btn-group-${id}`);
+            if (btnGroup) btnGroup.className = 'group-btn py-4 flex flex-col items-center justify-center gap-2 rounded-2xl text-sm font-black border-2 bg-blue-950 border-blue-950 text-white shadow-xl shadow-blue-900/30 transition-all active:scale-95';
+
+            const grade = g.charAt(0);
+            const gradeLabel = document.getElementById('grade-label');
+            if(gradeLabel) gradeLabel.innerText = `2. Materia (${grade}° Sec)`;
+            
+            renderSubjectSelect(grade);
+            document.getElementById('subject-container')?.classList.remove('hidden');
+            checkStartBtn();
+        }
+
+        async function selectSubject(val) {
+            const grade = selectedGroup.charAt(0);
+            
+            if (val === 'ADD_NEW') {
+                const newSubj = await showCustomDialog({
+                    type: 'prompt',
+                    title: 'Crear Nueva Materia',
+                    message: 'Escribe el nombre de la nueva materia:',
+                    placeholder: 'Ej. Taller de Robótica, Inglés Avanzado...'
+                });
+
+                if (newSubj && newSubj.trim() !== '') {
+                    const formattedSubj = newSubj.trim().toUpperCase();
+                    if (!customSubjectsByGrade[grade].includes(formattedSubj) && !(subjectsByGrade[grade] || []).includes(formattedSubj)) {
+                        customSubjectsByGrade[grade].push(formattedSubj);
+                    }
+                    renderSubjectSelect(grade);
+                    const subjectSelect = document.getElementById('subject-select');
+                    if(subjectSelect) subjectSelect.value = formattedSubj;
+                    selectedSubject = formattedSubj;
+                } else {
+                    const subjectSelect = document.getElementById('subject-select');
+                    if(subjectSelect) subjectSelect.value = '';
+                    selectedSubject = '';
+                }
+            } else {
+                selectedSubject = val;
+            }
+
+            if (currentRole === 'teacher' && selectedSubject && selectedSubject !== 'ADD_NEW') {
+                document.getElementById('teacher-container')?.classList.remove('hidden');
+            } else {
+                document.getElementById('teacher-container')?.classList.add('hidden');
+            }
+            checkStartBtn();
+        }
+
+        function toggleSubstitute() {
+            const isSub = document.getElementById('is-substitute')?.checked;
+            document.getElementById('regular-teacher-div')?.classList.toggle('hidden', isSub);
+            document.getElementById('substitute-teacher-div')?.classList.toggle('hidden', !isSub);
+            
+            if(isSub) {
+                const tSelect = document.getElementById('teacher-select');
+                if (tSelect) tSelect.value = '';
+            } else {
+                const subName = document.getElementById('substitute-name');
+                if (subName) subName.value = '';
+            }
+            checkStartBtn();
+        }
+
+        function checkStartBtn() {
+            if (currentRole !== 'teacher') return;
+            const btn = document.getElementById('btn-start');
+            if(!btn) return;
+
+            const isSub = document.getElementById('is-substitute')?.checked;
+            const subInput = document.getElementById('substitute-name');
+            const tSelect = document.getElementById('teacher-select');
+            
+            let tName = isSub ? (subInput ? subInput.value.trim() : '') : (tSelect ? tSelect.value : '');
+            
+            if(selectedGroup && selectedSubject && tName) {
+                btn.disabled = false;
+                btn.className = "w-full mt-10 bg-orange-600 hover:bg-orange-700 text-white font-black py-5 rounded-[2rem] shadow-2xl shadow-orange-200 transition-all active:scale-[0.97] flex items-center justify-center gap-3 animate-pulse";
+                setTimeout(() => btn.classList.remove('animate-pulse'), 1500);
+            } else {
+                btn.disabled = true;
+                btn.className = "w-full mt-10 bg-slate-200 text-slate-400 font-black py-5 rounded-[2rem] transition-all active:scale-[0.97] flex items-center justify-center gap-3";
+            }
+        }
+
+        async function verifyTeacherPinAndStart() {
+            if (currentRole === 'teacher') {
+                const isSub = document.getElementById('is-substitute')?.checked;
+                if (!isSub) {
+                    const tSelect = document.getElementById('teacher-select');
+                    const tName = tSelect ? tSelect.value : '';
+                    const teacher = teachersDB.find(t => t.name === tName);
+                    
+                    if (teacher) {
+                        const enteredPin = await showCustomDialog({
+                            type: 'prompt',
+                            inputType: 'password',
+                            title: 'Autenticación Requerida',
+                            message: `Ingresa tu NIP de seguridad de 4 dígitos, ${tName}:`,
+                            placeholder: '****'
+                        });
+
+                        if (enteredPin === null) return; 
+                        
+                        if (enteredPin !== teacher.pin) {
+                            await showCustomDialog({ type: 'alert', title: 'Acceso Denegado', message: 'El NIP ingresado es incorrecto.' });
+                            return; 
+                        }
+                    }
+                }
+            }
+            openAttendance();
+        }
+
+        function isCustomSubject() {
+            if(!selectedSubject || !selectedGroup) return false;
+            const grade = selectedGroup.charAt(0);
+            return (customSubjectsByGrade[grade] || []).includes(selectedSubject);
+        }
+
+        async function renameCustomGroup() {
+            const customId = selectedGroup + '_' + selectedSubject;
+            const newName = await showCustomDialog({
+                type: 'prompt',
+                title: 'Renombrar Materia',
+                message: 'Ingresa el nuevo nombre para esta materia:',
+                defaultValue: customSubjectGroups[customId].name
+            });
+            
+            if (newName && newName.trim() !== '') {
+                customSubjectGroups[customId].name = newName.trim().toUpperCase();
+                const attSubj = document.getElementById('att-subject');
+                if (attSubj) attSubj.innerHTML = `${customSubjectGroups[customId].name} <button onclick="renameCustomGroup()" class="ml-3 text-blue-300 hover:text-orange-500 active:scale-90 transition-all"><i class="fa-solid fa-pen"></i></button>`;
+            }
+        }
+
+        function openAttendance(isAdminMode = false) {
+            hideAllViews();
+            document.getElementById('view-attendance')?.classList.remove('hidden');
+            
+            let displaySubject = selectedSubject;
+            if (isCustomSubject()) {
+                const customId = selectedGroup + '_' + selectedSubject;
+                if (!customSubjectGroups[customId]) {
+                    customSubjectGroups[customId] = {
+                        name: selectedSubject, 
+                        students: JSON.parse(JSON.stringify(studentsDB[selectedGroup] || []))
+                    };
+                }
+                displaySubject = `${customSubjectGroups[customId].name} <button onclick="renameCustomGroup()" class="ml-3 text-blue-300 hover:text-orange-500 active:scale-90 transition-all"><i class="fa-solid fa-pen"></i></button>`;
+                document.getElementById('btn-edit-students')?.classList.remove('hidden'); 
+            } else {
+                if (currentRole !== 'admin') document.getElementById('btn-edit-students')?.classList.add('hidden');
+            }
+
+            if (isAdminMode || currentRole === 'admin') {
+                const attTeacher = document.getElementById('att-teacher');
+                if(attTeacher) attTeacher.innerHTML = `<i class="fa-solid fa-user-shield"></i> MODO EDICIÓN (${currentRole})`;
+                document.getElementById('edit-mode-banner')?.classList.remove('hidden');
+                
+                const btnSaveText = document.getElementById('btn-save-text');
+                if(btnSaveText) btnSaveText.innerText = "GUARDAR CORRECCIONES";
+                
+                if(currentRole === 'admin') document.getElementById('btn-edit-students')?.classList.remove('hidden');
+            } else {
+                isCovering = document.getElementById('is-substitute')?.checked;
+                const subNameInput = document.getElementById('substitute-name');
+                const tSelect = document.getElementById('teacher-select');
+                currentTeacher = isCovering ? (subNameInput ? subNameInput.value.trim().toUpperCase() : '') : (tSelect ? tSelect.value : '');
+                
+                const attTeacher = document.getElementById('att-teacher');
+                if(attTeacher) attTeacher.innerHTML = `<i class="fa-solid fa-user-tie"></i> ${currentTeacher} ${isCovering ? '<span class="text-orange-600 ml-1 font-black">(CUBRIENDO)</span>' : ''}`;
+            }
+            
+            const attSubj = document.getElementById('att-subject');
+            if(attSubj) attSubj.innerHTML = displaySubject;
+            
+            const attGroup = document.getElementById('att-group');
+            if(attGroup) attGroup.innerText = selectedGroup;
+            
+            searchTerm = ''; 
+            const searchInput = document.querySelector('input[placeholder="Buscar por nombre..."]');
+            if(searchInput) searchInput.value = '';
+            
+            renderStudents();
+        }
+
+        function closeAttendance() {
+            if(currentRole === 'teacher') openTeacherFlow();
+            else openAttendanceAsAdmin();
+        }
+
+        // --- LÓGICA DE ALUMNOS ---
+        function getActiveStudentList() {
+            if (isCustomSubject()) {
+                const customId = selectedGroup + '_' + selectedSubject;
+                return customSubjectGroups[customId] ? customSubjectGroups[customId].students : [];
+            }
+            return studentsDB[selectedGroup] || [];
+        }
+
+        function renderStudents() {
+            const students = getActiveStudentList();
+            students.sort((a, b) => a.n.localeCompare(b.n, 'es-MX', { sensitivity: 'base' }));
+            
+            const filtered = students.filter(s => s.n.toLowerCase().includes(searchTerm.toLowerCase()));
+            
+            const studentCount = document.getElementById('student-count');
+            if(studentCount) studentCount.innerText = `${students.length} ALUMNOS`;
+
+            const studentListEl = document.getElementById('student-list');
+            if(studentListEl) {
+                studentListEl.innerHTML = filtered.map(student => {
+                    const status = attendanceData[student.id] || '';
+                    const hasIncident = !!incidentData[student.id];
+                    const getBtnClass = (target, activeColor) => status === target ? `${activeColor} border-transparent shadow-lg scale-105 z-10 text-white` : `bg-white text-slate-400 border-slate-100 hover:border-slate-200`;
+                    const incidentBtnClass = hasIncident ? 'bg-amber-100 text-amber-600 shadow-inner ring-2 ring-amber-400' : 'bg-slate-50 text-slate-300 hover:text-amber-500 hover:bg-amber-50';
+
+                    return `
+                    <div class="bg-white p-5 rounded-[2.5rem] border border-slate-50 shadow-sm relative">
+                        <button onclick="openIncidentModal(${student.id}, '${student.n}')" class="absolute top-4 right-5 w-10 h-10 rounded-xl flex items-center justify-center transition-all ${incidentBtnClass}">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </button>
+                        <p class="font-black text-slate-700 text-sm tracking-tight uppercase mb-4 pr-14 px-1 flex items-start gap-2">
+                            <i class="fa-solid fa-dragon text-red-500 mt-0.5 text-base"></i>
+                            <span>${student.n}</span>
+                        </p>
+                        <div class="flex gap-2">
+                            <button onclick="markAttendance(${student.id}, 'A')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('A', 'bg-emerald-500')}"><i class="fa-solid fa-circle-check text-lg"></i><span class="text-[9px] font-black uppercase">Asistió</span></button>
+                            <button onclick="markAttendance(${student.id}, 'F')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('F', 'bg-red-500')}"><i class="fa-solid fa-circle-xmark text-lg"></i><span class="text-[9px] font-black uppercase">Falta</span></button>
+                            <button onclick="markAttendance(${student.id}, 'R')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('R', 'bg-amber-500')}"><i class="fa-solid fa-clock text-lg"></i><span class="text-[9px] font-black uppercase">Retardo</span></button>
+                            <button onclick="markAttendance(${student.id}, 'J')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('J', 'bg-blue-500')}"><i class="fa-solid fa-file-lines text-lg"></i><span class="text-[9px] font-black uppercase">Justif.</span></button>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+            updateProgress();
+        }
+
+        function markAttendance(id, status) { attendanceData[id] = status; renderStudents(); }
+        
+        function markAllPresent() {
+            getActiveStudentList().forEach(s => { if (!attendanceData[s.id]) attendanceData[s.id] = 'A'; });
+            renderStudents();
+        }
+        
+        function updateProgress() {
+            const total = getActiveStudentList().length;
+            let registered = 0;
+            getActiveStudentList().forEach(s => { if(attendanceData[s.id]) registered++; });
+            const pText = document.getElementById('progress-text');
+            if(pText) {
+                pText.innerText = `${registered} / ${total}`;
+                pText.className = (registered === total && total > 0) ? 'text-sm font-bold text-emerald-500' : 'text-sm font-bold text-blue-950';
+            }
+        }
+        
+        function handleSearch(e) { searchTerm = e.target.value; renderStudents(); }
+
+        // --- GESTIÓN DE ALUMNOS ---
+        function getTargetEditingList() {
+            if (currentEditingTarget.type === 'custom') {
+                return customSubjectGroups[currentEditingTarget.id].students;
+            }
+            return studentsDB[currentEditingTarget.id] || [];
+        }
+
+        function openManageModalFromAdmin(group) {
+            selectedGroup = group;
+            selectedSubject = ''; 
+            currentEditingTarget = { type: 'base', id: group };
+            openManageModal();
+        }
+
+        function openManageModal() {
+            if (isCustomSubject() && currentRole === 'teacher') {
+                const customId = selectedGroup + '_' + selectedSubject;
+                currentEditingTarget = { type: 'custom', id: customId };
+                const mgName = document.getElementById('manage-group-name');
+                if(mgName) mgName.innerText = customSubjectGroups[customId].name;
+                document.getElementById('custom-subject-help-text')?.classList.remove('hidden');
+            } else {
+                currentEditingTarget = { type: 'base', id: selectedGroup };
+                const mgName = document.getElementById('manage-group-name');
+                if(mgName) mgName.innerText = selectedGroup;
+                document.getElementById('custom-subject-help-text')?.classList.add('hidden');
+            }
+            
+            renderManageList();
+            document.getElementById('modal-manage')?.classList.remove('hidden');
+        }
+
+        function closeManageModal() {
+            closeModal('modal-manage');
+            const viewAtt = document.getElementById('view-attendance');
+            if(viewAtt && !viewAtt.classList.contains('hidden')) {
+                renderStudents(); 
+            }
+        }
+
+        function renderManageList() {
+            const students = getTargetEditingList();
+            students.sort((a, b) => a.n.localeCompare(b.n, 'es-MX', { sensitivity: 'base' }));
+            
+            const listEl = document.getElementById('manage-student-list');
+            if (listEl) {
+                listEl.innerHTML = students.map(s => `
+                    <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <span class="font-bold text-[11px] text-slate-700 uppercase">${s.n}</span>
+                        <button onclick="deleteStudent(${s.id})" class="text-red-400 bg-red-50 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-500 hover:text-white active:scale-90 transition-all"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `).join('') || '<p class="text-xs text-slate-400 text-center py-4">No hay alumnos en esta lista.</p>';
+            }
+            
+            const mCount = document.getElementById('manage-count');
+            if (mCount) mCount.innerText = `${students.length} alumnos`;
+        }
+
+        function addSingleStudent() {
+            const input = document.getElementById('new-student-input');
+            const name = input ? input.value.trim().toUpperCase() : '';
+            if (name) {
+                const targetList = getTargetEditingList();
+                if (currentEditingTarget.type === 'base' && !studentsDB[currentEditingTarget.id]) studentsDB[currentEditingTarget.id] = [];
+                
+                const newId = Date.now();
+                targetList.push({ id: newId, n: name });
+                mockStats[newId] = { a: 30, f: 0, r: 0, j: 0, total: 30 }; 
+                
+                if(input) input.value = ''; 
+                renderManageList();
+            }
+        }
+
+        function toggleExcelImport() { document.getElementById('excel-import-section')?.classList.toggle('hidden'); }
+        
+        function importFromExcel() {
+            const textEl = document.getElementById('excel-textarea');
+            const text = textEl ? textEl.value : '';
+            if (!text.trim()) return;
+            let addedCount = 0;
+            const targetList = getTargetEditingList();
+            
+            if (currentEditingTarget.type === 'base' && !studentsDB[currentEditingTarget.id]) studentsDB[currentEditingTarget.id] = [];
+
+            text.split('\n').forEach((line, index) => {
+                const name = line.trim().toUpperCase();
+                if (name) {
+                    const newId = Date.now() + index;
+                    targetList.push({ id: newId, n: name });
+                    mockStats[newId] = { a: 30, f: 0, r: 0, j: 0, total: 30 }; 
+                    addedCount++;
+                }
+            });
+            const btn = document.getElementById('btn-import-excel');
+            if(btn) {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = `<i class="fa-solid fa-check-double"></i> ¡${addedCount} Importados!`;
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    if(textEl) textEl.value = '';
+                    toggleExcelImport(); renderManageList();
+                }, 1500);
+            }
+        }
+
+        function deleteStudent(id) {
+            if (currentEditingTarget.type === 'custom') {
+                customSubjectGroups[currentEditingTarget.id].students = customSubjectGroups[currentEditingTarget.id].students.filter(s => s.id !== id);
+            } else {
+                studentsDB[currentEditingTarget.id] = studentsDB[currentEditingTarget.id].filter(s => s.id !== id);
+            }
+            delete attendanceData[id]; delete incidentData[id]; delete mockStats[id];
+            renderManageList();
+        }
+
+        // --- UTILIDADES GLOBALES Y SIMULACIÓN DE ENVÍO ---
+        function openIncidentModal(id, name) {
+            currentIncidentStudentId = id;
+            const sn = document.getElementById('modal-student-name');
+            if (sn) sn.innerText = name;
+            const incText = document.getElementById('incident-text');
+            if (incText) incText.value = incidentData[id] || '';
+            document.getElementById('modal-incident')?.classList.remove('hidden');
+        }
+        function clearIncident() { delete incidentData[currentIncidentStudentId]; closeModal('modal-incident'); renderStudents(); }
+        function saveIncident() {
+            const incText = document.getElementById('incident-text');
+            const text = incText ? incText.value.trim() : '';
+            if (text) incidentData[currentIncidentStudentId] = text; else delete incidentData[currentIncidentStudentId];
+            closeModal('modal-incident'); renderStudents();
+        }
+        function closeModal(id) { document.getElementById(id)?.classList.add('hidden'); }
+        
+        async function saveAndSendAttendance() {
+            if (!GOOGLE_APP_SCRIPT_URL || GOOGLE_APP_SCRIPT_URL === '') {
+                await showCustomDialog({
+                    title: 'Aviso (Simulación)',
+                    message: 'Estás probando la app en modo local. Verás la animación de éxito, pero como aún no has puesto tu URL de Google Apps Script, la información no se está enviando a tu Drive.'
+                });
+            }
+
+            const btn = document.getElementById('btn-save');
+            if(!btn) return;
+            const ogHTML = btn.innerHTML;
+            
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-xl"></i> <span>GUARDANDO EN DRIVE...</span>`;
+            btn.className = "w-full bg-slate-400 text-white font-black py-6 rounded-[2.5rem] shadow-md flex items-center justify-center gap-4 cursor-not-allowed transition-all";
+            btn.disabled = true;
+
+            const payload = {
+                dateStr: new Date().toISOString().slice(0,10),
+                group: selectedGroup,
+                subject: isCustomSubject() ? customSubjectGroups[selectedGroup+'_'+selectedSubject].name : selectedSubject,
+                teacher: currentTeacher,
+                isSubstitute: isCovering,
+                records: attendanceData,
+                incidents: incidentData
+            };
+            
+            try {
+                // Solo intentamos enviar a Google si hay una URL configurada
+                if (GOOGLE_APP_SCRIPT_URL && GOOGLE_APP_SCRIPT_URL !== '') {
+                    await fetch(GOOGLE_APP_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors', 
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                } else {
+                    // Simulamos un pequeño retraso de red si no hay URL
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                }
+
+                hideAllViews();
+                document.getElementById('view-success')?.classList.remove('hidden');
+            } catch (error) {
+                console.error("Error al guardar en Drive:", error);
+                await showCustomDialog({
+                    title: 'Error de Red',
+                    message: 'Hubo un problema de conexión. Revisa tu internet y vuelve a intentar.'
+                });
+            } finally {
+                btn.innerHTML = ogHTML;
+                btn.className = "w-full bg-slate-900 text-white font-black py-6 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] flex items-center justify-center gap-4 active:scale-95 transition-all";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
