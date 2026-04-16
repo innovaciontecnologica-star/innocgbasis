@@ -520,10 +520,39 @@
 
         let customSubjectGroups = {};
 
+        // --- SISTEMA DE ALMACENAMIENTO LOCAL (localStorage) ---
+        // Escudo de seguridad nivel dios para que la vista previa no colapse nunca
         let teachersDB = [
             { name: 'PROFA. MARÍA ELENA', pin: '1234' },
             { name: 'PROF. ROBERTO CARLOS', pin: '5678' }
         ];
+
+        function loadTeachersFromLocal() {
+            try {
+                if (typeof window !== 'undefined' && 'localStorage' in window && window['localStorage'] !== null) {
+                    const saved = window.localStorage.getItem('cgb_teachers');
+                    if (saved) {
+                        teachersDB = JSON.parse(saved);
+                    }
+                }
+            } catch (e) {
+                console.warn("Vista previa: No se pudo leer localStorage por restricciones de seguridad.");
+            }
+        }
+
+        function saveTeachersToLocal() {
+            try {
+                if (typeof window !== 'undefined' && 'localStorage' in window && window['localStorage'] !== null) {
+                    window.localStorage.setItem('cgb_teachers', JSON.stringify(teachersDB));
+                }
+            } catch (e) {
+                console.warn("Vista previa: No se pudo guardar en localStorage por restricciones de seguridad.");
+            }
+        }
+
+        // Ejecutamos la lectura al abrir la app
+        loadTeachersFromLocal();
+        // -----------------------------------------------------
 
         let mockStats = {};
         let selectedGroup = '';
@@ -692,6 +721,7 @@
             
             if (!teachersDB.find(t => t.name === name)) {
                 teachersDB.push({ name: name, pin: pin });
+                saveTeachersToLocal();
                 await showCustomDialog({ type: 'alert', title: '¡Éxito!', message: `El docente ${name} ha sido registrado correctamente.` });
                 goToPortal();
             } else {
@@ -803,6 +833,7 @@
             });
             if(confirmed) {
                 teachersDB = teachersDB.filter(t => t.name !== name);
+                saveTeachersToLocal();
                 refreshTeacherDropdowns();
             }
         }
@@ -821,6 +852,7 @@
                     const teacher = teachersDB.find(t => t.name === name);
                     if (teacher) {
                         teacher.pin = newPin.trim();
+                        saveTeachersToLocal();
                         renderAdminTeacherList();
                         await showCustomDialog({ type: 'alert', title: 'Actualizado', message: `El NIP de ${name} se actualizó a: ${teacher.pin}` });
                     }
@@ -922,7 +954,7 @@
             if (totalLabel) totalLabel.innerText = totalRegistros;
             
             const chartCanvas = document.getElementById('group-chart');
-            if (chartCanvas) {
+            if (chartCanvas && typeof Chart !== 'undefined') {
                 const ctx = chartCanvas.getContext('2d');
                 if (groupChartInstance) groupChartInstance.destroy();
                 
