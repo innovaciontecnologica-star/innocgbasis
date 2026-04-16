@@ -485,7 +485,6 @@
 
         let customSubjectsByGrade = { '1': [], '2': [], '3': [] };
 
-        // ¡Actualizado! Ahora el ID del alumno es el propio nombre para evitar números en Excel
         let studentsDB = {
             '1° A': [
                 {id: 'AGUILAR HERNÁNDEZ SANTIAGO', n: 'AGUILAR HERNÁNDEZ SANTIAGO'},
@@ -976,8 +975,7 @@
                 if (attendancePercentage < 90 && attendancePercentage >= 80) pctColor = 'text-amber-700 bg-amber-100 border border-amber-200'; 
                 if (attendancePercentage < 80) pctColor = 'text-red-700 bg-red-100 border border-red-200'; 
 
-                // Preparamos las variables por si el nombre tiene comillas simples (ej. O'Farrill)
-                const safeId = s.id.replace(/'/g, "\\'");
+                const safeId = s.id.toString().replace(/'/g, "\\'");
                 const safeName = s.n.replace(/'/g, "\\'");
 
                 html += `
@@ -1330,7 +1328,7 @@
                     const getBtnClass = (target, activeColor) => status === target ? `${activeColor} border-transparent shadow-lg scale-105 z-10 text-white` : `bg-white text-slate-400 border-slate-100 hover:border-slate-200`;
                     const incidentBtnClass = hasIncident ? 'bg-amber-100 text-amber-600 shadow-inner ring-2 ring-amber-400' : 'bg-slate-50 text-slate-300 hover:text-amber-500 hover:bg-amber-50';
 
-                    const safeId = student.id.replace(/'/g, "\\'");
+                    const safeId = student.id.toString().replace(/'/g, "\\'");
                     const safeName = student.n.replace(/'/g, "\\'");
 
                     return `
@@ -1422,7 +1420,7 @@
             const listEl = document.getElementById('manage-student-list');
             if (listEl) {
                 listEl.innerHTML = students.map(s => {
-                    const safeId = s.id.replace(/'/g, "\\'");
+                    const safeId = s.id.toString().replace(/'/g, "\\'");
                     return `
                     <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
                         <span class="font-bold text-[11px] text-slate-700 uppercase">${s.n}</span>
@@ -1443,7 +1441,6 @@
                 const targetList = getTargetEditingList();
                 if (currentEditingTarget.type === 'base' && !studentsDB[currentEditingTarget.id]) studentsDB[currentEditingTarget.id] = [];
                 
-                // Evitar duplicados
                 if (targetList.some(s => s.id === name)) {
                     showCustomDialog({ type: 'alert', message: 'Este alumno ya está en la lista.' });
                     return;
@@ -1471,7 +1468,6 @@
             text.split('\n').forEach((line) => {
                 const name = line.trim().toUpperCase();
                 if (name) {
-                    // Evitar duplicados
                     if (!targetList.some(s => s.id === name)) {
                         targetList.push({ id: name, n: name });
                         mockStats[name] = { a: 30, f: 0, r: 0, j: 0, total: 30 }; 
