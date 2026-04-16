@@ -244,7 +244,7 @@
                         <div class="space-y-3">
                             <div class="relative" id="regular-teacher-div">
                                 <select id="teacher-select" onchange="checkStartBtn()" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 font-bold appearance-none text-slate-700 cursor-pointer pr-10">
-                                    <option value="">-- Selecciona tu nombre --</option>
+                                    <option value="">-- Cargando maestros... --</option>
                                 </select>
                                 <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                                     <i class="fa-solid fa-chevron-down"></i>
@@ -520,38 +520,57 @@
 
         let customSubjectGroups = {};
 
-        // --- SISTEMA DE ALMACENAMIENTO LOCAL (localStorage) ---
-        // Escudo de seguridad nivel dios para que la vista previa no colapse nunca
+        // --- SISTEMA DE ALMACENAMIENTO DE MAESTROS EN LA NUBE ---
         let teachersDB = [
             { name: 'PROFA. MARÍA ELENA', pin: '1234' },
             { name: 'PROF. ROBERTO CARLOS', pin: '5678' }
         ];
 
+        // Función para cargar maestros guardados localmente como respaldo rápido
         function loadTeachersFromLocal() {
             try {
                 if (typeof window !== 'undefined' && 'localStorage' in window && window['localStorage'] !== null) {
                     const saved = window.localStorage.getItem('cgb_teachers');
-                    if (saved) {
-                        teachersDB = JSON.parse(saved);
-                    }
+                    if (saved) teachersDB = JSON.parse(saved);
                 }
-            } catch (e) {
-                console.warn("Vista previa: No se pudo leer localStorage por restricciones de seguridad.");
-            }
+            } catch (e) {}
         }
 
+        // Función para guardar maestros como respaldo local
         function saveTeachersToLocal() {
             try {
                 if (typeof window !== 'undefined' && 'localStorage' in window && window['localStorage'] !== null) {
                     window.localStorage.setItem('cgb_teachers', JSON.stringify(teachersDB));
                 }
-            } catch (e) {
-                console.warn("Vista previa: No se pudo guardar en localStorage por restricciones de seguridad.");
-            }
+            } catch (e) {}
         }
 
-        // Ejecutamos la lectura al abrir la app
-        loadTeachersFromLocal();
+        // ¡NUEVO! Función para traer la lista oficial de maestros desde Google Sheets
+        async function loadTeachersFromCloud() {
+            if (!GOOGLE_APP_SCRIPT_URL || GOOGLE_APP_SCRIPT_URL === '') {
+                loadTeachersFromLocal();
+                refreshTeacherDropdowns();
+                return;
+            }
+
+            try {
+                // Hacemos una petición GET a tu Google Apps Script
+                const response = await fetch(GOOGLE_APP_SCRIPT_URL + '?action=getTeachers');
+                const data = await response.json();
+                
+                if (data && Array.isArray(data) && data.length > 0) {
+                    teachersDB = data; // Reemplazamos los locales por la base de datos maestra
+                    saveTeachersToLocal(); // Actualizamos el respaldo local
+                    refreshTeacherDropdowns();
+                } else {
+                    loadTeachersFromLocal(); // Si viene vacío, usamos respaldo
+                }
+            } catch (error) {
+                console.warn("No se pudo cargar desde la nube. Usando memoria local.", error);
+                loadTeachersFromLocal();
+            }
+            refreshTeacherDropdowns();
+        }
         // -----------------------------------------------------
 
         let mockStats = {};
@@ -641,7 +660,8 @@
             const adminGroupContainer = document.getElementById('admin-group-container');
             if (adminGroupContainer) adminGroupContainer.innerHTML = adminGroupHtml;
 
-            refreshTeacherDropdowns();
+            // Iniciar la descarga de maestros desde Google
+            loadTeachersFromCloud();
             generateMockStats(); 
         });
 
@@ -720,8 +740,22 @@
             if (!name.startsWith("PROF")) { name = "PROF. " + name; }
             
             if (!teachersDB.find(t => t.name === name)) {
+                // Lo agregamos a la interfaz inmediatamente
                 teachersDB.push({ name: name, pin: pin });
                 saveTeachersToLocal();
+                refreshTeacherDropdowns();
+                
+                // ¡NUEVO! Lo mandamos a guardar a Google Sheets en segundo plano
+                if (GOOGLE_APP_SCRIPT_URL && GOOGLE_APP_SCRIPT_URL !== '') {
+                    const payload = { action: 'registerTeacher', name: name, pin: pin };
+                    fetch(GOOGLE_APP_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    }).catch(e => console.error("Error guardando en la nube", e));
+                }
+
                 await showCustomDialog({ type: 'alert', title: '¡Éxito!', message: `El docente ${name} ha sido registrado correctamente.` });
                 goToPortal();
             } else {
@@ -835,6 +869,16 @@
                 teachersDB = teachersDB.filter(t => t.name !== name);
                 saveTeachersToLocal();
                 refreshTeacherDropdowns();
+
+                // ¡NUEVO! Actualizar en Google Sheets
+                if (GOOGLE_APP_SCRIPT_URL && GOOGLE_APP_SCRIPT_URL !== '') {
+                    fetch(GOOGLE_APP_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'updateTeacher', name: name, delete: true })
+                    }).catch(e => console.error(e));
+                }
             }
         }
 
@@ -854,6 +898,17 @@
                         teacher.pin = newPin.trim();
                         saveTeachersToLocal();
                         renderAdminTeacherList();
+
+                        // ¡NUEVO! Actualizar en Google Sheets
+                        if (GOOGLE_APP_SCRIPT_URL && GOOGLE_APP_SCRIPT_URL !== '') {
+                            fetch(GOOGLE_APP_SCRIPT_URL, {
+                                method: 'POST',
+                                mode: 'no-cors',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ action: 'updateTeacher', name: name, pin: teacher.pin, delete: false })
+                            }).catch(e => console.error(e));
+                        }
+
                         await showCustomDialog({ type: 'alert', title: 'Actualizado', message: `El NIP de ${name} se actualizó a: ${teacher.pin}` });
                     }
                 } else {
@@ -1463,6 +1518,7 @@
             btn.disabled = true;
 
             const payload = {
+                action: 'saveAttendance', // ¡NUEVO! Le decimos al backend qué acción hacer
                 dateStr: new Date().toISOString().slice(0,10),
                 group: selectedGroup,
                 subject: isCustomSubject() ? customSubjectGroups[selectedGroup+'_'+selectedSubject].name : selectedSubject,
