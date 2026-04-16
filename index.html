@@ -485,37 +485,38 @@
 
         let customSubjectsByGrade = { '1': [], '2': [], '3': [] };
 
+        // ¡Actualizado! Ahora el ID del alumno es el propio nombre para evitar números en Excel
         let studentsDB = {
             '1° A': [
-                {id: 101, n: 'AGUILAR HERNÁNDEZ SANTIAGO'},
-                {id: 102, n: 'ÁLVAREZ LÓPEZ MARÍA FERNANDA'},
-                {id: 103, n: 'BAUTISTA RAMÍREZ EMILIANO'},
-                {id: 104, n: 'CARMONA RUIZ VALERIA'},
-                {id: 105, n: 'CASTILLO MENDOZA DIEGO'},
-                {id: 106, n: 'CRUZ VÁZQUEZ ANA SOFÍA'},
-                {id: 107, n: 'DÍAZ FLORES LEONARDO'},
-                {id: 108, n: 'DOMÍNGUEZ PÉREZ CAMILA'},
-                {id: 109, n: 'ESTRADA GÓMEZ ALEJANDRO'},
-                {id: 110, n: 'FERNÁNDEZ JIMÉNEZ DANIELA'},
-                {id: 111, n: 'GARCÍA TORRES MATEO'},
-                {id: 112, n: 'GÓMEZ REYES ISABELLA'},
-                {id: 113, n: 'GONZÁLEZ MORALES SEBASTIÁN'},
-                {id: 114, n: 'HERNÁNDEZ CRUZ VALENTINA'},
-                {id: 115, n: 'JIMÉNEZ ORTIZ NICOLÁS'},
-                {id: 116, n: 'LÓPEZ GUTIÉRREZ RENATA'},
-                {id: 117, n: 'MARTÍNEZ SÁNCHEZ MATÍAS'},
-                {id: 118, n: 'MEDINA CHÁVEZ XIMENA'},
-                {id: 119, n: 'MENDOZA CASTRO LUIS ÁNGEL'},
-                {id: 120, n: 'ORTIZ NAVARRO VICTORIA'},
-                {id: 121, n: 'PÉREZ DÍAZ GAEL'},
-                {id: 122, n: 'RAMÍREZ ÁLVAREZ ROMINA'},
-                {id: 123, n: 'RODRÍGUEZ ROMERO MAXIMILIANO'},
-                {id: 124, n: 'SÁNCHEZ HERRERA SOFÍA'},
-                {id: 125, n: 'VARGAS LUNA DANIEL'}
+                {id: 'AGUILAR HERNÁNDEZ SANTIAGO', n: 'AGUILAR HERNÁNDEZ SANTIAGO'},
+                {id: 'ÁLVAREZ LÓPEZ MARÍA FERNANDA', n: 'ÁLVAREZ LÓPEZ MARÍA FERNANDA'},
+                {id: 'BAUTISTA RAMÍREZ EMILIANO', n: 'BAUTISTA RAMÍREZ EMILIANO'},
+                {id: 'CARMONA RUIZ VALERIA', n: 'CARMONA RUIZ VALERIA'},
+                {id: 'CASTILLO MENDOZA DIEGO', n: 'CASTILLO MENDOZA DIEGO'},
+                {id: 'CRUZ VÁZQUEZ ANA SOFÍA', n: 'CRUZ VÁZQUEZ ANA SOFÍA'},
+                {id: 'DÍAZ FLORES LEONARDO', n: 'DÍAZ FLORES LEONARDO'},
+                {id: 'DOMÍNGUEZ PÉREZ CAMILA', n: 'DOMÍNGUEZ PÉREZ CAMILA'},
+                {id: 'ESTRADA GÓMEZ ALEJANDRO', n: 'ESTRADA GÓMEZ ALEJANDRO'},
+                {id: 'FERNÁNDEZ JIMÉNEZ DANIELA', n: 'FERNÁNDEZ JIMÉNEZ DANIELA'},
+                {id: 'GARCÍA TORRES MATEO', n: 'GARCÍA TORRES MATEO'},
+                {id: 'GÓMEZ REYES ISABELLA', n: 'GÓMEZ REYES ISABELLA'},
+                {id: 'GONZÁLEZ MORALES SEBASTIÁN', n: 'GONZÁLEZ MORALES SEBASTIÁN'},
+                {id: 'HERNÁNDEZ CRUZ VALENTINA', n: 'HERNÁNDEZ CRUZ VALENTINA'},
+                {id: 'JIMÉNEZ ORTIZ NICOLÁS', n: 'JIMÉNEZ ORTIZ NICOLÁS'},
+                {id: 'LÓPEZ GUTIÉRREZ RENATA', n: 'LÓPEZ GUTIÉRREZ RENATA'},
+                {id: 'MARTÍNEZ SÁNCHEZ MATÍAS', n: 'MARTÍNEZ SÁNCHEZ MATÍAS'},
+                {id: 'MEDINA CHÁVEZ XIMENA', n: 'MEDINA CHÁVEZ XIMENA'},
+                {id: 'MENDOZA CASTRO LUIS ÁNGEL', n: 'MENDOZA CASTRO LUIS ÁNGEL'},
+                {id: 'ORTIZ NAVARRO VICTORIA', n: 'ORTIZ NAVARRO VICTORIA'},
+                {id: 'PÉREZ DÍAZ GAEL', n: 'PÉREZ DÍAZ GAEL'},
+                {id: 'RAMÍREZ ÁLVAREZ ROMINA', n: 'RAMÍREZ ÁLVAREZ ROMINA'},
+                {id: 'RODRÍGUEZ ROMERO MAXIMILIANO', n: 'RODRÍGUEZ ROMERO MAXIMILIANO'},
+                {id: 'SÁNCHEZ HERRERA SOFÍA', n: 'SÁNCHEZ HERRERA SOFÍA'},
+                {id: 'VARGAS LUNA DANIEL', n: 'VARGAS LUNA DANIEL'}
             ],
-            '2° B': [{id: 201, n: 'ALFEREZ BETANCOURT PAULA MICHELLE'}, {id: 202, n: 'AVILA FERNANDEZ MARIA JOSE'}, {id: 203, n: 'CENOBIO HERNANDEZ KAIRI ANDREA'}],
-            '3° C': [{id: 301, n: 'AGUILERA CARRO ITZAE'}, {id: 302, n: 'ANDRADE JIMENEZ MARIO'}],
-            '3° A': [{id: 401, n: 'AGUILAR GALLEGOS STEPHANIE MAITE'}]
+            '2° B': [{id: 'ALFEREZ BETANCOURT PAULA MICHELLE', n: 'ALFEREZ BETANCOURT PAULA MICHELLE'}, {id: 'AVILA FERNANDEZ MARIA JOSE', n: 'AVILA FERNANDEZ MARIA JOSE'}, {id: 'CENOBIO HERNANDEZ KAIRI ANDREA', n: 'CENOBIO HERNANDEZ KAIRI ANDREA'}],
+            '3° C': [{id: 'AGUILERA CARRO ITZAE', n: 'AGUILERA CARRO ITZAE'}, {id: 'ANDRADE JIMENEZ MARIO', n: 'ANDRADE JIMENEZ MARIO'}],
+            '3° A': [{id: 'AGUILAR GALLEGOS STEPHANIE MAITE', n: 'AGUILAR GALLEGOS STEPHANIE MAITE'}]
         };
 
         let customSubjectGroups = {};
@@ -852,7 +853,7 @@
                         <span class="text-[10px] font-black text-orange-600">NIP: ${t.pin}</span>
                     </div>
                     <div class="flex gap-1">
-                        <button onclick="resetTeacherPin('${t.name}')" class="text-blue-400 bg-blue-50 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-blue-500 hover:text-white active:scale-90 transition-all" title="Cambiar NIP"><i class="fa-solid fa-key"></i></button>
+                        <button onclick="resetTeacherPin('${t.name}')" class="text-blue-400 bg-blue-50 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-blue-50 hover:text-white active:scale-90 transition-all" title="Cambiar NIP"><i class="fa-solid fa-key"></i></button>
                         <button onclick="removeTeacher('${t.name}')" class="text-red-400 bg-red-50 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-500 hover:text-white active:scale-90 transition-all" title="Eliminar"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 </div>
@@ -975,8 +976,12 @@
                 if (attendancePercentage < 90 && attendancePercentage >= 80) pctColor = 'text-amber-700 bg-amber-100 border border-amber-200'; 
                 if (attendancePercentage < 80) pctColor = 'text-red-700 bg-red-100 border border-red-200'; 
 
+                // Preparamos las variables por si el nombre tiene comillas simples (ej. O'Farrill)
+                const safeId = s.id.replace(/'/g, "\\'");
+                const safeName = s.n.replace(/'/g, "\\'");
+
                 html += `
-                    <tr onclick="openStudentDailyDetail(${s.id}, '${s.n}', '${group}')" class="border-b border-slate-100 hover:bg-blue-50 transition-colors cursor-pointer group">
+                    <tr onclick="openStudentDailyDetail('${safeId}', '${safeName}', '${group}')" class="border-b border-slate-100 hover:bg-blue-50 transition-colors cursor-pointer group">
                         <td class="p-3 font-bold text-slate-700 whitespace-nowrap max-w-[150px] truncate group-hover:text-blue-600" title="${s.n}">
                             ${s.n} <i class="fa-solid fa-magnifying-glass text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity ml-1"></i>
                         </td>
@@ -1325,9 +1330,12 @@
                     const getBtnClass = (target, activeColor) => status === target ? `${activeColor} border-transparent shadow-lg scale-105 z-10 text-white` : `bg-white text-slate-400 border-slate-100 hover:border-slate-200`;
                     const incidentBtnClass = hasIncident ? 'bg-amber-100 text-amber-600 shadow-inner ring-2 ring-amber-400' : 'bg-slate-50 text-slate-300 hover:text-amber-500 hover:bg-amber-50';
 
+                    const safeId = student.id.replace(/'/g, "\\'");
+                    const safeName = student.n.replace(/'/g, "\\'");
+
                     return `
                     <div class="bg-white p-5 rounded-[2.5rem] border border-slate-50 shadow-sm relative">
-                        <button onclick="openIncidentModal(${student.id}, '${student.n}')" class="absolute top-4 right-5 w-10 h-10 rounded-xl flex items-center justify-center transition-all ${incidentBtnClass}">
+                        <button onclick="openIncidentModal('${safeId}', '${safeName}')" class="absolute top-4 right-5 w-10 h-10 rounded-xl flex items-center justify-center transition-all ${incidentBtnClass}">
                             <i class="fa-solid fa-triangle-exclamation"></i>
                         </button>
                         <p class="font-black text-slate-700 text-sm tracking-tight uppercase mb-4 pr-14 px-1 flex items-start gap-2">
@@ -1335,10 +1343,10 @@
                             <span>${student.n}</span>
                         </p>
                         <div class="flex gap-2">
-                            <button onclick="markAttendance(${student.id}, 'A')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('A', 'bg-emerald-500')}"><i class="fa-solid fa-circle-check text-lg"></i><span class="text-[9px] font-black uppercase">Asistió</span></button>
-                            <button onclick="markAttendance(${student.id}, 'F')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('F', 'bg-red-500')}"><i class="fa-solid fa-circle-xmark text-lg"></i><span class="text-[9px] font-black uppercase">Falta</span></button>
-                            <button onclick="markAttendance(${student.id}, 'R')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('R', 'bg-amber-500')}"><i class="fa-solid fa-clock text-lg"></i><span class="text-[9px] font-black uppercase">Retardo</span></button>
-                            <button onclick="markAttendance(${student.id}, 'J')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('J', 'bg-blue-500')}"><i class="fa-solid fa-file-lines text-lg"></i><span class="text-[9px] font-black uppercase">Justif.</span></button>
+                            <button onclick="markAttendance('${safeId}', 'A')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('A', 'bg-emerald-500')}"><i class="fa-solid fa-circle-check text-lg"></i><span class="text-[9px] font-black uppercase">Asistió</span></button>
+                            <button onclick="markAttendance('${safeId}', 'F')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('F', 'bg-red-500')}"><i class="fa-solid fa-circle-xmark text-lg"></i><span class="text-[9px] font-black uppercase">Falta</span></button>
+                            <button onclick="markAttendance('${safeId}', 'R')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('R', 'bg-amber-500')}"><i class="fa-solid fa-clock text-lg"></i><span class="text-[9px] font-black uppercase">Retardo</span></button>
+                            <button onclick="markAttendance('${safeId}', 'J')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('J', 'bg-blue-500')}"><i class="fa-solid fa-file-lines text-lg"></i><span class="text-[9px] font-black uppercase">Justif.</span></button>
                         </div>
                     </div>`;
                 }).join('');
@@ -1413,12 +1421,15 @@
             
             const listEl = document.getElementById('manage-student-list');
             if (listEl) {
-                listEl.innerHTML = students.map(s => `
+                listEl.innerHTML = students.map(s => {
+                    const safeId = s.id.replace(/'/g, "\\'");
+                    return `
                     <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
                         <span class="font-bold text-[11px] text-slate-700 uppercase">${s.n}</span>
-                        <button onclick="deleteStudent(${s.id})" class="text-red-400 bg-red-50 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-500 hover:text-white active:scale-90 transition-all"><i class="fa-solid fa-trash-can"></i></button>
+                        <button onclick="deleteStudent('${safeId}')" class="text-red-400 bg-red-50 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-500 hover:text-white active:scale-90 transition-all"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
-                `).join('') || '<p class="text-xs text-slate-400 text-center py-4">No hay alumnos en esta lista.</p>';
+                    `
+                }).join('') || '<p class="text-xs text-slate-400 text-center py-4">No hay alumnos en esta lista.</p>';
             }
             
             const mCount = document.getElementById('manage-count');
@@ -1432,9 +1443,14 @@
                 const targetList = getTargetEditingList();
                 if (currentEditingTarget.type === 'base' && !studentsDB[currentEditingTarget.id]) studentsDB[currentEditingTarget.id] = [];
                 
-                const newId = Date.now();
-                targetList.push({ id: newId, n: name });
-                mockStats[newId] = { a: 30, f: 0, r: 0, j: 0, total: 30 }; 
+                // Evitar duplicados
+                if (targetList.some(s => s.id === name)) {
+                    showCustomDialog({ type: 'alert', message: 'Este alumno ya está en la lista.' });
+                    return;
+                }
+                
+                targetList.push({ id: name, n: name });
+                mockStats[name] = { a: 30, f: 0, r: 0, j: 0, total: 30 }; 
                 
                 if(input) input.value = ''; 
                 renderManageList();
@@ -1452,13 +1468,15 @@
             
             if (currentEditingTarget.type === 'base' && !studentsDB[currentEditingTarget.id]) studentsDB[currentEditingTarget.id] = [];
 
-            text.split('\n').forEach((line, index) => {
+            text.split('\n').forEach((line) => {
                 const name = line.trim().toUpperCase();
                 if (name) {
-                    const newId = Date.now() + index;
-                    targetList.push({ id: newId, n: name });
-                    mockStats[newId] = { a: 30, f: 0, r: 0, j: 0, total: 30 }; 
-                    addedCount++;
+                    // Evitar duplicados
+                    if (!targetList.some(s => s.id === name)) {
+                        targetList.push({ id: name, n: name });
+                        mockStats[name] = { a: 30, f: 0, r: 0, j: 0, total: 30 }; 
+                        addedCount++;
+                    }
                 }
             });
             const btn = document.getElementById('btn-import-excel');
