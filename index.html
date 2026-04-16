@@ -455,7 +455,7 @@
             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
                 <i class="fa-solid fa-copyright"></i> Propiedad Colegio Gran Bretaña<br>
                 <span class="text-blue-900">Departamento de Innovación Tecnológica CGB</span><br>
-                <span class="text-[8px] text-slate-500 normal-case tracking-normal">by L.I.E. ARTURO PALACIOS GONZALEZ</span>
+                <span class="text-[8px] text-slate-500 normal-case tracking-normal">by L.I.E. ARTURO PALACIOS GONZALEZ • Versión 1.2</span>
             </p>
         </div>
     </footer>
@@ -485,6 +485,7 @@
 
         let customSubjectsByGrade = { '1': [], '2': [], '3': [] };
 
+        // ¡Actualizado! Ahora el ID del alumno es el propio nombre para evitar números en Excel
         let studentsDB = {
             '1° A': [
                 {id: 'AGUILAR HERNÁNDEZ SANTIAGO', n: 'AGUILAR HERNÁNDEZ SANTIAGO'},
@@ -668,13 +669,14 @@
         function generateMockStats() {
             Object.keys(studentsDB).forEach(group => {
                 studentsDB[group].forEach(student => {
-                    if (!mockStats[student.id]) {
+                    // Ahora la base de estadísticas se amarra directamente al nombre (student.n)
+                    if (!mockStats[student.n]) {
                         const totalClasses = 30; 
                         const f = Math.floor(Math.random() * 4); 
                         const r = Math.floor(Math.random() * 3); 
                         const j = Math.floor(Math.random() * 2); 
                         const a = totalClasses - f - r - j;
-                        mockStats[student.id] = { a, f, r, j, total: totalClasses };
+                        mockStats[student.n] = { a, f, r, j, total: totalClasses };
                     }
                 });
             });
@@ -966,7 +968,7 @@
             let groupA = 0, groupF = 0, groupR = 0, groupJ = 0;
 
             students.sort((a, b) => a.n.localeCompare(b.n, 'es-MX', { sensitivity: 'base' })).forEach(s => {
-                const st = mockStats[s.id] || { a:0, f:0, r:0, j:0, total:0 };
+                const st = mockStats[s.n] || { a:0, f:0, r:0, j:0, total:0 };
                 groupA += st.a; groupF += st.f; groupR += st.r; groupJ += st.j;
                 
                 const attendancePercentage = st.total > 0 ? Math.round(((st.a + st.r + st.j) / st.total) * 100) : 0;
@@ -975,11 +977,10 @@
                 if (attendancePercentage < 90 && attendancePercentage >= 80) pctColor = 'text-amber-700 bg-amber-100 border border-amber-200'; 
                 if (attendancePercentage < 80) pctColor = 'text-red-700 bg-red-100 border border-red-200'; 
 
-                const safeId = s.id.toString().replace(/'/g, "\\'");
                 const safeName = s.n.replace(/'/g, "\\'");
 
                 html += `
-                    <tr onclick="openStudentDailyDetail('${safeId}', '${safeName}', '${group}')" class="border-b border-slate-100 hover:bg-blue-50 transition-colors cursor-pointer group">
+                    <tr onclick="openStudentDailyDetail('${safeName}', '${group}')" class="border-b border-slate-100 hover:bg-blue-50 transition-colors cursor-pointer group">
                         <td class="p-3 font-bold text-slate-700 whitespace-nowrap max-w-[150px] truncate group-hover:text-blue-600" title="${s.n}">
                             ${s.n} <i class="fa-solid fa-magnifying-glass text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity ml-1"></i>
                         </td>
@@ -1038,7 +1039,7 @@
             }
         }
 
-        function openStudentDailyDetail(id, name, group) {
+        function openStudentDailyDetail(name, group) {
             const studentNameEl = document.getElementById('detail-student-name');
             if(studentNameEl) studentNameEl.innerText = name;
             
@@ -1323,17 +1324,17 @@
             const studentListEl = document.getElementById('student-list');
             if(studentListEl) {
                 studentListEl.innerHTML = filtered.map(student => {
-                    const status = attendanceData[student.id] || '';
-                    const hasIncident = !!incidentData[student.id];
+                    // ¡Forzamos a usar student.n en lugar de student.id para todo!
+                    const status = attendanceData[student.n] || '';
+                    const hasIncident = !!incidentData[student.n];
                     const getBtnClass = (target, activeColor) => status === target ? `${activeColor} border-transparent shadow-lg scale-105 z-10 text-white` : `bg-white text-slate-400 border-slate-100 hover:border-slate-200`;
                     const incidentBtnClass = hasIncident ? 'bg-amber-100 text-amber-600 shadow-inner ring-2 ring-amber-400' : 'bg-slate-50 text-slate-300 hover:text-amber-500 hover:bg-amber-50';
 
-                    const safeId = student.id.toString().replace(/'/g, "\\'");
                     const safeName = student.n.replace(/'/g, "\\'");
 
                     return `
                     <div class="bg-white p-5 rounded-[2.5rem] border border-slate-50 shadow-sm relative">
-                        <button onclick="openIncidentModal('${safeId}', '${safeName}')" class="absolute top-4 right-5 w-10 h-10 rounded-xl flex items-center justify-center transition-all ${incidentBtnClass}">
+                        <button onclick="openIncidentModal('${safeName}')" class="absolute top-4 right-5 w-10 h-10 rounded-xl flex items-center justify-center transition-all ${incidentBtnClass}">
                             <i class="fa-solid fa-triangle-exclamation"></i>
                         </button>
                         <p class="font-black text-slate-700 text-sm tracking-tight uppercase mb-4 pr-14 px-1 flex items-start gap-2">
@@ -1341,10 +1342,10 @@
                             <span>${student.n}</span>
                         </p>
                         <div class="flex gap-2">
-                            <button onclick="markAttendance('${safeId}', 'A')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('A', 'bg-emerald-500')}"><i class="fa-solid fa-circle-check text-lg"></i><span class="text-[9px] font-black uppercase">Asistió</span></button>
-                            <button onclick="markAttendance('${safeId}', 'F')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('F', 'bg-red-500')}"><i class="fa-solid fa-circle-xmark text-lg"></i><span class="text-[9px] font-black uppercase">Falta</span></button>
-                            <button onclick="markAttendance('${safeId}', 'R')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('R', 'bg-amber-500')}"><i class="fa-solid fa-clock text-lg"></i><span class="text-[9px] font-black uppercase">Retardo</span></button>
-                            <button onclick="markAttendance('${safeId}', 'J')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('J', 'bg-blue-500')}"><i class="fa-solid fa-file-lines text-lg"></i><span class="text-[9px] font-black uppercase">Justif.</span></button>
+                            <button onclick="markAttendance('${safeName}', 'A')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('A', 'bg-emerald-500')}"><i class="fa-solid fa-circle-check text-lg"></i><span class="text-[9px] font-black uppercase">Asistió</span></button>
+                            <button onclick="markAttendance('${safeName}', 'F')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('F', 'bg-red-500')}"><i class="fa-solid fa-circle-xmark text-lg"></i><span class="text-[9px] font-black uppercase">Falta</span></button>
+                            <button onclick="markAttendance('${safeName}', 'R')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('R', 'bg-amber-500')}"><i class="fa-solid fa-clock text-lg"></i><span class="text-[9px] font-black uppercase">Retardo</span></button>
+                            <button onclick="markAttendance('${safeName}', 'J')" class="flex-1 flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border-2 transition-all ${getBtnClass('J', 'bg-blue-500')}"><i class="fa-solid fa-file-lines text-lg"></i><span class="text-[9px] font-black uppercase">Justif.</span></button>
                         </div>
                     </div>`;
                 }).join('');
@@ -1352,17 +1353,17 @@
             updateProgress();
         }
 
-        function markAttendance(id, status) { attendanceData[id] = status; renderStudents(); }
+        function markAttendance(name, status) { attendanceData[name] = status; renderStudents(); }
         
         function markAllPresent() {
-            getActiveStudentList().forEach(s => { if (!attendanceData[s.id]) attendanceData[s.id] = 'A'; });
+            getActiveStudentList().forEach(s => { if (!attendanceData[s.n]) attendanceData[s.n] = 'A'; });
             renderStudents();
         }
         
         function updateProgress() {
             const total = getActiveStudentList().length;
             let registered = 0;
-            getActiveStudentList().forEach(s => { if(attendanceData[s.id]) registered++; });
+            getActiveStudentList().forEach(s => { if(attendanceData[s.n]) registered++; });
             const pText = document.getElementById('progress-text');
             if(pText) {
                 pText.innerText = `${registered} / ${total}`;
@@ -1420,11 +1421,11 @@
             const listEl = document.getElementById('manage-student-list');
             if (listEl) {
                 listEl.innerHTML = students.map(s => {
-                    const safeId = s.id.toString().replace(/'/g, "\\'");
+                    const safeName = s.n.replace(/'/g, "\\'");
                     return `
                     <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
                         <span class="font-bold text-[11px] text-slate-700 uppercase">${s.n}</span>
-                        <button onclick="deleteStudent('${safeId}')" class="text-red-400 bg-red-50 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-500 hover:text-white active:scale-90 transition-all"><i class="fa-solid fa-trash-can"></i></button>
+                        <button onclick="deleteStudent('${safeName}')" class="text-red-400 bg-red-50 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-500 hover:text-white active:scale-90 transition-all"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                     `
                 }).join('') || '<p class="text-xs text-slate-400 text-center py-4">No hay alumnos en esta lista.</p>';
@@ -1441,7 +1442,7 @@
                 const targetList = getTargetEditingList();
                 if (currentEditingTarget.type === 'base' && !studentsDB[currentEditingTarget.id]) studentsDB[currentEditingTarget.id] = [];
                 
-                if (targetList.some(s => s.id === name)) {
+                if (targetList.some(s => s.n === name)) {
                     showCustomDialog({ type: 'alert', message: 'Este alumno ya está en la lista.' });
                     return;
                 }
@@ -1468,7 +1469,7 @@
             text.split('\n').forEach((line) => {
                 const name = line.trim().toUpperCase();
                 if (name) {
-                    if (!targetList.some(s => s.id === name)) {
+                    if (!targetList.some(s => s.n === name)) {
                         targetList.push({ id: name, n: name });
                         mockStats[name] = { a: 30, f: 0, r: 0, j: 0, total: 30 }; 
                         addedCount++;
@@ -1487,23 +1488,23 @@
             }
         }
 
-        function deleteStudent(id) {
+        function deleteStudent(name) {
             if (currentEditingTarget.type === 'custom') {
-                customSubjectGroups[currentEditingTarget.id].students = customSubjectGroups[currentEditingTarget.id].students.filter(s => s.id !== id);
+                customSubjectGroups[currentEditingTarget.id].students = customSubjectGroups[currentEditingTarget.id].students.filter(s => s.n !== name);
             } else {
-                studentsDB[currentEditingTarget.id] = studentsDB[currentEditingTarget.id].filter(s => s.id !== id);
+                studentsDB[currentEditingTarget.id] = studentsDB[currentEditingTarget.id].filter(s => s.n !== name);
             }
-            delete attendanceData[id]; delete incidentData[id]; delete mockStats[id];
+            delete attendanceData[name]; delete incidentData[name]; delete mockStats[name];
             renderManageList();
         }
 
         // --- UTILIDADES GLOBALES Y SIMULACIÓN DE ENVÍO ---
-        function openIncidentModal(id, name) {
-            currentIncidentStudentId = id;
+        function openIncidentModal(name) {
+            currentIncidentStudentId = name;
             const sn = document.getElementById('modal-student-name');
             if (sn) sn.innerText = name;
             const incText = document.getElementById('incident-text');
-            if (incText) incText.value = incidentData[id] || '';
+            if (incText) incText.value = incidentData[name] || '';
             document.getElementById('modal-incident')?.classList.remove('hidden');
         }
         function clearIncident() { delete incidentData[currentIncidentStudentId]; closeModal('modal-incident'); renderStudents(); }
@@ -1532,7 +1533,7 @@
             btn.disabled = true;
 
             const payload = {
-                action: 'saveAttendance', // ¡NUEVO! Le decimos al backend qué acción hacer
+                action: 'saveAttendance',
                 dateStr: new Date().toISOString().slice(0,10),
                 group: selectedGroup,
                 subject: isCustomSubject() ? customSubjectGroups[selectedGroup+'_'+selectedSubject].name : selectedSubject,
