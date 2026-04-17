@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual CGB Digital - Maestros</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .accordion-content {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .accordion-content.open {
+            max-height: 1500px;
+            opacity: 1;
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-blue-100 min-h-screen text-slate-800 font-sans antialiased pb-12">
+
+    <header class="bg-blue-950 text-white px-6 py-8 shadow-lg text-center rounded-b-[2rem]">
+        <div class="max-w-xl mx-auto fade-in">
+            <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/20 shadow-inner">
+                <i class="fa-solid fa-graduation-cap text-3xl text-orange-400"></i>
+            </div>
+            <h1 class="text-3xl font-black tracking-tight mb-2">CGB Digital</h1>
+            <p class="text-blue-200 text-sm font-bold uppercase tracking-widest">Manual Interactivo para Docentes</p>
+            <p class="mt-4 text-xs text-blue-100/80 leading-relaxed">
+                Bienvenido a la nueva plataforma de Control Escolar. Este sistema está diseñado para agilizar tu toma de asistencia y ayudarte a detectar alumnos en riesgo a tiempo. ¡Es fácil, rápido y seguro!
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-xl mx-auto px-4 mt-8 space-y-4">
+        
+        <p class="text-center text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Toca cada paso para desplegar las instrucciones</p>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden fade-in" style="animation-delay: 0.1s;">
+            <button class="w-full px-6 py-5 flex items-center justify-between bg-white hover:bg-slate-50 transition-colors focus:outline-none" onclick="toggleAccordion('paso1', this)">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-black text-lg">1</div>
+                    <h2 class="font-black text-slate-700 text-left">Tu Primer Ingreso (Registro)</h2>
+                </div>
+                <i class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-300"></i>
+            </button>
+            <div id="paso1" class="accordion-content bg-slate-50 border-t border-slate-100 px-6">
+                <div class="py-5 space-y-4 text-sm text-slate-600">
+                    <p>Antes de poder pasar lista por primera vez, necesitas crear tu perfil de seguridad:</p>
+                    <ol class="list-decimal pl-5 space-y-2 font-medium">
+                        <li>En la pantalla principal, selecciona <strong>"Registro Nuevo Maestro"</strong>.</li>
+                        <li>Escribe tu nombre completo o título (Ej. <em>Prof. Juan Pérez</em>).</li>
+                        <li>Crea un <strong>NIP de 4 dígitos</strong>. Este código es tu "firma electrónica", ¡no lo olvides!</li>
+                        <li>Presiona <strong>"Registrarme"</strong>. ¡Listo! Solo necesitas hacer esto una vez en el ciclo escolar.</li>
+                    </ol>
+                    <div class="mt-4 p-3 bg-white border border-slate-200 rounded-xl text-center shadow-sm">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest block mb-2">Ejemplo Visual</span>
+                        <div class="bg-slate-100 rounded-lg min-h-[8rem] flex items-center justify-center border-2 border-dashed border-slate-300 overflow-hidden p-2">
+                            <img src="paso1.jpeg" alt="Pantalla de Registro" class="max-h-64 w-auto object-contain rounded" onerror="this.onerror=null; this.parentElement.innerHTML=`<span class='text-slate-400 font-medium text-xs'>Falta subir la imagen <b>paso1.jpeg</b> a GitHub</span>`;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden fade-in" style="animation-delay: 0.2s;">
+            <button class="w-full px-6 py-5 flex items-center justify-between bg-white hover:bg-slate-50 transition-colors focus:outline-none" onclick="toggleAccordion('paso2', this)">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-black text-lg">2</div>
+                    <h2 class="font-black text-slate-700 text-left">Preparar tu Lista</h2>
+                </div>
+                <i class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-300"></i>
+            </button>
+            <div id="paso2" class="accordion-content bg-slate-50 border-t border-slate-100 px-6">
+                <div class="py-5 space-y-4 text-sm text-slate-600">
+                    <p>Cada vez que entres a un salón, sigue estos pasos para abrir la lista correcta:</p>
+                    <ol class="list-decimal pl-5 space-y-3 font-medium">
+                        <li>Selecciona <strong>"Soy Maestro"</strong> en el inicio.</li>
+                        <li>Elige el <strong>Grupo Base</strong> al que le vas a dar clase (Ej. <em>1° A</em>).</li>
+                        <li>Selecciona tu <strong>Materia</strong>. <br><em>*Nota: Si impartes un taller especial o tu materia no aparece, elige "➕ Crear nueva materia..." hasta abajo de la lista para agregarla.</em></li>
+                        <li>Selecciona tu <strong>Nombre</strong> en la lista de docentes y presiona "Cargar Alumnos".</li>
+                        <li>El sistema te pedirá tu <strong>NIP de 4 dígitos</strong> por seguridad.</li>
+                    </ol>
+                    <div class="mt-4 p-3 bg-white border border-slate-200 rounded-xl text-center shadow-sm">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest block mb-2">Ejemplo Visual</span>
+                        <div class="bg-slate-100 rounded-lg min-h-[8rem] flex items-center justify-center border-2 border-dashed border-slate-300 overflow-hidden p-2">
+                            <img src="paso2.jpeg" alt="Pantalla Preparar Lista" class="max-h-64 w-auto object-contain rounded" onerror="this.onerror=null; this.parentElement.innerHTML=`<span class='text-slate-400 font-medium text-xs'>Falta subir la imagen <b>paso2.jpeg</b> a GitHub</span>`;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden fade-in" style="animation-delay: 0.3s;">
+            <button class="w-full px-6 py-5 flex items-center justify-between bg-white hover:bg-slate-50 transition-colors focus:outline-none" onclick="toggleAccordion('paso3', this)">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-black text-lg">3</div>
+                    <h2 class="font-black text-slate-700 text-left">Pasar Lista y Alertas</h2>
+                </div>
+                <i class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-300"></i>
+            </button>
+            <div id="paso3" class="accordion-content bg-slate-50 border-t border-slate-100 px-6">
+                <div class="py-5 space-y-4 text-sm text-slate-600">
+                    <p>En la pantalla de asistencia verás a todos los alumnos ordenados alfabéticamente. Tienes 4 botones por alumno:</p>
+                    <div class="grid grid-cols-2 gap-2 my-3">
+                        <div class="bg-emerald-100 text-emerald-800 p-2 rounded-lg text-center font-bold text-xs border border-emerald-200">A = Asistió</div>
+                        <div class="bg-red-100 text-red-800 p-2 rounded-lg text-center font-bold text-xs border border-red-200">F = Falta</div>
+                        <div class="bg-amber-100 text-amber-800 p-2 rounded-lg text-center font-bold text-xs border border-amber-200">R = Retardo</div>
+                        <div class="bg-blue-100 text-blue-800 p-2 rounded-lg text-center font-bold text-xs border border-blue-200">J = Justificado</div>
+                    </div>
+                    <p><strong>💡 TIP:</strong> Usa el botón "TODOS PRESENTES" arriba a la derecha para ganar tiempo, y luego solo corrige a los que faltaron.</p>
+                    
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl mt-4 shadow-sm">
+                        <h4 class="font-black text-red-700 flex items-center gap-2 mb-1"><i class="fa-solid fa-triangle-exclamation"></i> Alerta Temprana</h4>
+                        <p class="text-xs text-red-900 leading-relaxed">Si ves un cuadro rojo parpadeando sobre el nombre de un alumno, significa que el sistema detectó que <strong>ya acumula 3 o más faltas en el ciclo</strong>. Presta especial atención a este alumno para intervenir a tiempo.</p>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-white border border-slate-200 rounded-xl text-center shadow-sm">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest block mb-2">Ejemplo Visual</span>
+                        <div class="bg-slate-100 rounded-lg min-h-[8rem] flex items-center justify-center border-2 border-dashed border-slate-300 overflow-hidden p-2">
+                            <img src="paso3.jpeg" alt="Pantalla de Asistencia" class="max-h-64 w-auto object-contain rounded" onerror="this.onerror=null; this.parentElement.innerHTML=`<span class='text-slate-400 font-medium text-xs'>Falta subir la imagen <b>paso3.jpeg</b> a GitHub</span>`;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden fade-in" style="animation-delay: 0.4s;">
+            <button class="w-full px-6 py-5 flex items-center justify-between bg-white hover:bg-slate-50 transition-colors focus:outline-none" onclick="toggleAccordion('paso4', this)">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-black text-lg">4</div>
+                    <h2 class="font-black text-slate-700 text-left">Reporte de Incidencias</h2>
+                </div>
+                <i class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-300"></i>
+            </button>
+            <div id="paso4" class="accordion-content bg-slate-50 border-t border-slate-100 px-6">
+                <div class="py-5 space-y-4 text-sm text-slate-600">
+                    <p>Si ocurrió un incidente de conducta, un problema de salud, o simplemente quieres dejarle una nota a Dirección sobre un alumno en particular:</p>
+                    <ol class="list-decimal pl-5 space-y-2 font-medium">
+                        <li>Toca el ícono de <strong>mensaje/alerta</strong> en la esquina superior derecha de la tarjeta del alumno.</li>
+                        <li>Escribe el reporte detallado en la ventana que aparece.</li>
+                        <li>Presiona <strong>"Guardar"</strong>.</li>
+                    </ol>
+                    <p>El botón se quedará encendido en color amarillo para recordarte que el reporte está activo y se enviará junto con la lista.</p>
+
+                    <div class="mt-4 p-3 bg-white border border-slate-200 rounded-xl text-center shadow-sm">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest block mb-2">Ejemplo Visual</span>
+                        <div class="bg-slate-100 rounded-lg min-h-[8rem] flex items-center justify-center border-2 border-dashed border-slate-300 overflow-hidden p-2">
+                            <img src="paso4.jpeg" alt="Pantalla de Incidencia" class="max-h-64 w-auto object-contain rounded" onerror="this.onerror=null; this.parentElement.innerHTML=`<span class='text-slate-400 font-medium text-xs'>Falta subir la imagen <b>paso4.jpeg</b> a GitHub</span>`;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden fade-in" style="animation-delay: 0.5s;">
+            <button class="w-full px-6 py-5 flex items-center justify-between bg-white hover:bg-slate-50 transition-colors focus:outline-none" onclick="toggleAccordion('paso5', this)">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-black text-lg"><i class="fa-solid fa-paper-plane text-sm"></i></div>
+                    <h2 class="font-black text-slate-700 text-left">Guardar y Enviar</h2>
+                </div>
+                <i class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-300"></i>
+            </button>
+            <div id="paso5" class="accordion-content bg-slate-50 border-t border-slate-100 px-6">
+                <div class="py-5 space-y-4 text-sm text-slate-600">
+                    <p>Una vez que hayas verificado que el contador de arriba diga que todos están registrados (Ej. <em>25/25 Registrados</em>):</p>
+                    <ol class="list-decimal pl-5 space-y-2 font-medium mb-4">
+                        <li>Ve al final de la página.</li>
+                        <li>Presiona el botón negro gigante <strong>"ENVIAR AL DIRECTOR"</strong>.</li>
+                        <li>Espera la pantalla verde de confirmación que dice <strong>"¡LOGRADO!"</strong>.</li>
+                    </ol>
+
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-xl shadow-sm">
+                        <h4 class="font-black text-blue-900 flex items-center gap-2 mb-1"><i class="fa-solid fa-wifi"></i> Modo Sin Conexión</h4>
+                        <p class="text-xs text-blue-800 leading-relaxed">¿El internet de la escuela está fallando? No te preocupes. La aplicación tiene un <strong>Escudo Antifallos</strong>. Puedes seguir pasando lista normalmente; el sistema guardará todo en la memoria de tu celular de forma segura hasta que vuelvas a tener señal.</p>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-white border border-slate-200 rounded-xl text-center shadow-sm">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest block mb-2">Ejemplo Visual</span>
+                        <div class="bg-slate-100 rounded-lg min-h-[8rem] flex items-center justify-center border-2 border-dashed border-slate-300 overflow-hidden p-2">
+                            <img src="paso5.jpeg" alt="Pantalla de Éxito" class="max-h-64 w-auto object-contain rounded" onerror="this.onerror=null; this.parentElement.innerHTML=`<span class='text-slate-400 font-medium text-xs'>Falta subir la imagen <b>paso5.jpeg</b> a GitHub</span>`;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="mt-12 text-center pb-8">
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
+            Propiedad Colegio Gran Bretaña<br>
+            <span class="text-blue-950">Depto. de Innovación Tecnológica</span>
+        </p>
+    </footer>
+
+    <script>
+        function toggleAccordion(id, btn) {
+            const content = document.getElementById(id);
+            const icon = btn.querySelector('i.fa-chevron-down');
+            
+            // Cerrar todos los demás
+            document.querySelectorAll('.accordion-content').forEach(el => {
+                if(el.id !== id && el.classList.contains('open')) {
+                    el.classList.remove('open');
+                    el.previousElementSibling.querySelector('i').style.transform = 'rotate(0deg)';
+                }
+            });
+
+            // Abrir/Cerrar el seleccionado
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                content.classList.add('open');
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+    </script>
+</body>
+</html>
