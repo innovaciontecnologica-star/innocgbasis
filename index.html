@@ -191,16 +191,16 @@
 
                     <div id="subject-container" class="hidden space-y-4 pt-2">
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">2. Materia / Taller</label>
-                        <select id="subject-select" onchange="selectSubject(this.value)" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none"></select>
+                        <select id="subject-select" onchange="selectSubject(this.value)" class="w-full p-4 bg-slate-50 border-2 border-slate-100 text-slate-700 rounded-2xl font-bold outline-none transition-all"></select>
                     </div>
 
                     <div id="teacher-container" class="hidden space-y-4 pt-2">
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">3. Docente</label>
-                        <select id="teacher-select" onchange="checkStartBtn()" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none"></select>
+                        <select id="teacher-select" onchange="checkStartBtn()" class="w-full p-4 bg-slate-50 border-2 border-slate-100 text-slate-700 rounded-2xl font-bold outline-none transition-all"></select>
                         <label class="flex items-center gap-2 text-xs font-bold text-slate-500 px-2 cursor-pointer mt-2">
                             <input type="checkbox" id="is-substitute" onchange="toggleSubstitute()" class="w-5 h-5 rounded"> Soy sustituto
                         </label>
-                        <input type="text" id="substitute-name" oninput="checkStartBtn()" class="hidden w-full p-4 bg-orange-50 border-2 border-orange-200 rounded-2xl font-bold uppercase outline-none mt-2" placeholder="Tu nombre completo...">
+                        <input type="text" id="substitute-name" oninput="checkStartBtn()" class="hidden w-full p-4 bg-orange-50 border-2 border-orange-200 rounded-2xl font-bold uppercase outline-none mt-2 transition-all" placeholder="Tu nombre completo...">
                     </div>
                 </div>
 
@@ -311,7 +311,7 @@
     <footer class="w-full text-center py-6 mt-auto relative z-10">
         <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">
             <i class="fa-solid fa-copyright"></i> Propiedad Colegio Gran Bretaña<br>
-            <span class="text-blue-900">L.I.E. ARTURO PALACIOS GONZALEZ • Versión 2.0</span>
+            <span class="text-blue-900">L.I.E. ARTURO PALACIOS GONZALEZ • Versión 2.1</span>
         </p>
     </footer>
 
@@ -448,7 +448,21 @@
 
         function openTeacherFlow() {
             currentRole = 'teacher';
+            
+            // Limpiar selecciones visuales cada vez que se entra
+            selectedGroup = ''; selectedSubject = ''; currentTeacher = '';
+            document.querySelectorAll('.group-btn').forEach(b => {
+                b.classList.remove('bg-blue-950', 'text-white', 'border-blue-950', 'shadow-md', 'scale-105');
+                b.classList.add('bg-slate-50', 'text-slate-500', 'border-transparent');
+            });
+            document.getElementById('subject-container').classList.add('hidden');
+            document.getElementById('teacher-container').classList.add('hidden');
+            document.getElementById('subject-select').value = '';
+            document.getElementById('is-substitute').checked = false;
+            toggleSubstitute();
             refreshTeacherDropdowns();
+            checkStartBtn();
+            
             hideAllViews();
             document.getElementById('view-selector').classList.remove('hidden');
         }
@@ -562,9 +576,17 @@
         // --- ASISTENCIA Y SELECCIÓN DE MATERIAS ---
         function selectGroup(g) {
             selectedGroup = g;
-            document.querySelectorAll('.group-btn').forEach(b => b.classList.remove('bg-blue-950','text-white','border-blue-950'));
+            
+            // Efecto visual al seleccionar grupo
+            document.querySelectorAll('.group-btn').forEach(b => {
+                b.classList.remove('bg-blue-950', 'text-white', 'border-blue-950', 'shadow-md', 'scale-105');
+                b.classList.add('bg-slate-50', 'text-slate-500', 'border-transparent');
+            });
             const btn = document.getElementById(`btn-group-${g.replace('° ','-')}`);
-            if(btn) btn.classList.add('bg-blue-950','text-white','border-blue-950');
+            if(btn) {
+                btn.classList.remove('bg-slate-50', 'text-slate-500', 'border-transparent');
+                btn.classList.add('bg-blue-950', 'text-white', 'border-blue-950', 'shadow-md', 'scale-105');
+            }
 
             const grade = g.charAt(0);
             let html = '<option value="">-- Elige materia --</option>';
@@ -580,6 +602,11 @@
 
             html += `<option value="ADD_NEW" style="color:orange; font-weight:bold;">➕ Crear taller para ${g}...</option>`;
             document.getElementById('subject-select').innerHTML = html;
+            
+            // Al cambiar de grupo, reseteamos la selección del taller/docente para evitar cruces
+            document.getElementById('subject-select').value = '';
+            selectedSubject = '';
+            
             document.getElementById('subject-container').classList.remove('hidden');
             checkStartBtn();
         }
@@ -623,12 +650,39 @@
 
         function checkStartBtn() {
             const isSub = document.getElementById('is-substitute').checked;
-            const tName = isSub ? document.getElementById('substitute-name').value.trim() : document.getElementById('teacher-select').value;
+            const teacherSelect = document.getElementById('teacher-select');
+            const subjectSelect = document.getElementById('subject-select');
+            const subNameInput = document.getElementById('substitute-name');
+            const tName = isSub ? subNameInput.value.trim() : teacherSelect.value;
             const btn = document.getElementById('btn-start');
-            if (selectedGroup && selectedSubject && tName) {
-                btn.disabled = false; btn.classList.replace('bg-slate-200','bg-orange-600'); btn.classList.replace('text-slate-400','text-white');
+
+            // Efecto visual para el selector de Materia/Taller
+            if (selectedSubject) {
+                subjectSelect.classList.remove('bg-slate-50', 'border-slate-100', 'text-slate-700');
+                subjectSelect.classList.add('bg-blue-50', 'border-blue-500', 'text-blue-950');
             } else {
-                btn.disabled = true; btn.classList.replace('bg-orange-600','bg-slate-200'); btn.classList.replace('text-white','text-slate-400');
+                subjectSelect.classList.remove('bg-blue-50', 'border-blue-500', 'text-blue-950');
+                subjectSelect.classList.add('bg-slate-50', 'border-slate-100', 'text-slate-700');
+            }
+
+            // Efecto visual para el selector de Docente
+            if (tName && !isSub) {
+                teacherSelect.classList.remove('bg-slate-50', 'border-slate-100', 'text-slate-700');
+                teacherSelect.classList.add('bg-blue-50', 'border-blue-500', 'text-blue-950');
+            } else {
+                teacherSelect.classList.remove('bg-blue-50', 'border-blue-500', 'text-blue-950');
+                teacherSelect.classList.add('bg-slate-50', 'border-slate-100', 'text-slate-700');
+            }
+
+            // Activar botón final si todo está completo
+            if (selectedGroup && selectedSubject && tName) {
+                btn.disabled = false; 
+                btn.classList.remove('bg-slate-200','text-slate-400');
+                btn.classList.add('bg-orange-600','text-white');
+            } else {
+                btn.disabled = true; 
+                btn.classList.remove('bg-orange-600','text-white');
+                btn.classList.add('bg-slate-200','text-slate-400');
             }
         }
 
