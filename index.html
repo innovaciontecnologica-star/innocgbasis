@@ -293,7 +293,7 @@
     <footer class="w-full text-center py-6 mt-auto">
         <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">
             <i class="fa-solid fa-copyright"></i> Propiedad Colegio Gran Bretaña<br>
-            <span class="text-blue-900">L.I.E. ARTURO PALACIOS GONZALEZ • Versión 1.6</span>
+            <span class="text-blue-900">L.I.E. ARTURO PALACIOS GONZALEZ • Versión 1.7</span>
         </p>
     </footer>
 
@@ -319,6 +319,30 @@
         let attendanceData = {}; let incidentData = {};
         let currentEditingTarget = null; let groupChartInstance = null;
 
+        // --- FUNCIONES DE ALMACENAMIENTO LOCAL (ESCUDO ANTIFALLOS) ---
+        function loadLocalDefaults() {
+            try {
+                const s = localStorage.getItem('cgb_students');
+                if (s) studentsDB = JSON.parse(s);
+                else { studentsDB = {}; groups.forEach(g => studentsDB[g] = []); }
+                
+                const t = localStorage.getItem('cgb_teachers');
+                if (t) teachersDB = JSON.parse(t);
+                else teachersDB = [];
+            } catch(e) {
+                studentsDB = {}; groups.forEach(g => studentsDB[g] = []);
+                teachersDB = [];
+            }
+            realStats = {};
+        }
+
+        function saveToLocal() {
+            try {
+                localStorage.setItem('cgb_students', JSON.stringify(studentsDB));
+                localStorage.setItem('cgb_teachers', JSON.stringify(teachersDB));
+            } catch(e) {}
+        }
+
         // --- INICIALIZACIÓN ---
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'numeric'}).toUpperCase();
@@ -327,20 +351,41 @@
         });
 
         async function loadAllFromCloud() {
-            if (!GOOGLE_APP_SCRIPT_URL) return;
-            try {
-                const resStud = await fetch(GOOGLE_APP_SCRIPT_URL + '?action=getStudents');
-                studentsDB = await resStud.json();
-                
-                const resTeach = await fetch(GOOGLE_APP_SCRIPT_URL + '?action=getTeachers');
-                teachersDB = await resTeach.json();
-
-                const resStats = await fetch(GOOGLE_APP_SCRIPT_URL + '?action=getStats');
-                realStats = await resStats.json();
-
+            if (!GOOGLE_APP_SCRIPT_URL) {
+                loadLocalDefaults();
                 renderWorkshopsInAdmin();
                 refreshTeacherDropdowns();
-            } catch(e) { console.error("Error al sincronizar con nube", e); }
+                return;
+            }
+            try {
+                // Obtener Alumnos
+                const resStud = await fetch(GOOGLE_APP_SCRIPT_URL + '?action=getStudents');
+                const textStud = await resStud.text();
+                if (textStud && textStud.startsWith('{')) studentsDB = JSON.parse(textStud);
+                else throw new Error("Respuesta no es JSON");
+                
+                // Obtener Maestros
+                const resTeach = await fetch(GOOGLE_APP_SCRIPT_URL + '?action=getTeachers');
+                const textTeach = await resTeach.text();
+                if (textTeach && textTeach.startsWith('[')) teachersDB = JSON.parse(textTeach);
+                
+                // Obtener Estadísticas
+                const resStats = await fetch(GOOGLE_APP_SCRIPT_URL + '?action=getStats');
+                const textStats = await resStats.text();
+                if (textStats && textStats.startsWith('{')) realStats = JSON.parse(textStats);
+
+                saveToLocal(); // Guardar respaldo exitoso
+            } catch(e) { 
+                console.error("Error al sincronizar con nube. Usando respaldo local.", e);
+                loadLocalDefaults(); // Si el internet falla, activamos el modo offline
+            }
+
+            // Asegurarnos que las variables sean correctas siempre
+            groups.forEach(g => { if(!studentsDB[g]) studentsDB[g] = []; });
+            if (!Array.isArray(teachersDB)) teachersDB = [];
+
+            renderWorkshopsInAdmin();
+            refreshTeacherDropdowns();
         }
 
         // --- RENDERIZADO INICIAL ---
@@ -433,6 +478,7 @@
             
             if (!teachersDB.find(t => t.name === name)) {
                 teachersDB.push({ name: name, pin: pin });
+                saveToLocal();
                 refreshTeacherDropdowns();
                 if (GOOGLE_APP_SCRIPT_URL) {
                     fetch(GOOGLE_APP_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'registerTeacher', name: name, pin: pin }) }).catch(e => console.error(e));
@@ -445,6 +491,7 @@
         }
 
         function refreshTeacherDropdowns() {
+            if (!Array.isArray(teachersDB)) teachersDB = [];
             const html = '<option value="">-- Elige tu nombre --</option>' + teachersDB.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
             document.getElementById('teacher-select').innerHTML = html;
         }
@@ -466,7 +513,7 @@
             const confirmed = await showCustomDialog({ type: 'confirm', title: 'Eliminar Docente', message: `¿Dar de baja a:\n${name}?` });
             if(confirmed) {
                 teachersDB = teachersDB.filter(t => t.name !== name);
-                refreshTeacherDropdowns(); renderAdminTeacherList();
+                saveToLocal(); refreshTeacherDropdowns(); renderAdminTeacherList();
                 if (GOOGLE_APP_SCRIPT_URL) fetch(GOOGLE_APP_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'updateTeacher', name: name, delete: true }) }).catch(e=>console.error(e));
             }
         }
@@ -477,7 +524,7 @@
                 const teacher = teachersDB.find(t => t.name === name);
                 if (teacher) {
                     teacher.pin = newPin.trim();
-                    renderAdminTeacherList();
+                    saveToLocal(); renderAdminTeacherList();
                     if (GOOGLE_APP_SCRIPT_URL) fetch(GOOGLE_APP_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'updateTeacher', name: name, pin: teacher.pin, delete: false }) }).catch(e=>console.error(e));
                     await showCustomDialog({ type: 'alert', message: `NIP actualizado.` });
                 }
@@ -730,6 +777,7 @@
         }
 
         async function syncGroupToCloud(groupName) {
+            saveToLocal();
             if(!GOOGLE_APP_SCRIPT_URL) return;
             const payload = { action:'syncGroup', group:groupName, students: studentsDB[groupName].map(s => s.n) };
             await fetch(GOOGLE_APP_SCRIPT_URL, { method:'POST', mode:'no-cors', body:JSON.stringify(payload) }).catch(e=>console.log(e));
