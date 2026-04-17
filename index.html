@@ -447,7 +447,7 @@
             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
                 <i class="fa-solid fa-copyright"></i> Propiedad Colegio Gran Bretaña<br>
                 <span class="text-blue-900">Departamento de Innovación Tecnológica CGB</span><br>
-                <span class="text-[8px] text-slate-500 normal-case tracking-normal">by L.I.E. ARTURO PALACIOS GONZALEZ • Versión 1.4</span>
+                <span class="text-[8px] text-slate-500 normal-case tracking-normal">by L.I.E. ARTURO PALACIOS GONZALEZ • Versión 1.5</span>
             </p>
         </div>
     </footer>
@@ -478,7 +478,6 @@
         let customSubjectsByGrade = { '1': [], '2': [], '3': [] };
 
         // --- ALUMNOS (CARGA DINÁMICA DESDE GOOGLE SHEETS) ---
-        // Esta es la base de respaldo por si no hay internet
         let defaultStudentsDB = {
             '1° A': [
                 {id: 'AGUILAR HERNÁNDEZ SANTIAGO', n: 'AGUILAR HERNÁNDEZ SANTIAGO'},
@@ -500,7 +499,6 @@
                 } else { studentsDB = JSON.parse(JSON.stringify(defaultStudentsDB)); }
             } catch(e) { studentsDB = JSON.parse(JSON.stringify(defaultStudentsDB)); }
             
-            // Asegurar que todos los grupos existan vacíos si no tienen alumnos
             groups.forEach(g => { if(!studentsDB[g]) studentsDB[g] = []; });
         }
 
@@ -521,11 +519,11 @@
                 const response = await fetch(GOOGLE_APP_SCRIPT_URL + '?action=getStudents');
                 const data = await response.json();
                 if (data && Object.keys(data).length > 0) {
-                    studentsDB = data; // Usamos los de la nube como oficiales
+                    studentsDB = data; 
                     groups.forEach(g => { if(!studentsDB[g]) studentsDB[g] = []; });
                     saveStudentsToLocal();
                 } else {
-                    loadStudentsFromLocal(); // Si viene vacío
+                    loadStudentsFromLocal(); 
                 }
             } catch (e) {
                 console.warn("Fallo carga alumnos nube", e);
@@ -533,22 +531,14 @@
             }
         }
 
-        // Función para subir una lista oficial a Google Sheets
         async function syncGroupToCloud(groupName) {
-            saveStudentsToLocal(); // Siempre guardar en celular primero
+            saveStudentsToLocal(); 
             if (!GOOGLE_APP_SCRIPT_URL || GOOGLE_APP_SCRIPT_URL === '') return;
             
             const studentsInGroup = studentsDB[groupName].map(s => s.n);
-            const payload = {
-                action: 'syncGroup',
-                group: groupName,
-                students: studentsInGroup
-            };
+            const payload = { action: 'syncGroup', group: groupName, students: studentsInGroup };
             fetch(GOOGLE_APP_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
             }).catch(e => console.error(e));
         }
 
@@ -597,9 +587,24 @@
             }
             refreshTeacherDropdowns();
         }
+
+        // --- ESTADÍSTICAS REALES (CARGA DINÁMICA DESDE GOOGLE SHEETS) ---
+        let realStats = {};
+
+        async function loadStatsFromCloud() {
+            if (!GOOGLE_APP_SCRIPT_URL || GOOGLE_APP_SCRIPT_URL === '') return;
+            try {
+                const response = await fetch(GOOGLE_APP_SCRIPT_URL + '?action=getStats');
+                const data = await response.json();
+                if (data && Object.keys(data).length > 0) {
+                    realStats = data; 
+                }
+            } catch (e) {
+                console.warn("Fallo carga de estadísticas desde la nube", e);
+            }
+        }
         // -----------------------------------------------------
 
-        let mockStats = {};
         let selectedGroup = '';
         let selectedSubject = '';
         let currentTeacher = '';
@@ -611,7 +616,6 @@
         let currentEditingTarget = null; 
         let groupChartInstance = null; 
 
-        // --- SISTEMA DE DIÁLOGOS PERSONALIZADOS ---
         function showCustomDialog(options) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('modal-custom-dialog');
@@ -661,7 +665,6 @@
             });
         }
 
-        // --- INICIALIZACIÓN ---
         document.addEventListener('DOMContentLoaded', () => {
             const dateStr = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
             const currentDateEl = document.getElementById('current-date');
@@ -686,12 +689,12 @@
             const adminGroupContainer = document.getElementById('admin-group-container');
             if (adminGroupContainer) adminGroupContainer.innerHTML = adminGroupHtml;
 
-            // Iniciar la descarga de maestros y alumnos desde Google
+            // Iniciar la descarga de datos desde Google
             loadTeachersFromCloud();
             loadStudentsFromCloud();
+            loadStatsFromCloud();
         });
 
-        // --- NAVEGACIÓN Y PORTAL ---
         function hideAllViews() {
             ['view-portal', 'view-register', 'view-admin', 'view-selector', 'view-attendance', 'view-success', 'view-statistics'].forEach(id => {
                 const el = document.getElementById(id);
@@ -711,7 +714,6 @@
             document.getElementById('teacher-container')?.classList.add('hidden');
         }
 
-        // --- FUNCIONES MAESTRO ---
         function openTeacherFlow() {
             currentRole = 'teacher';
             refreshTeacherDropdowns();
@@ -730,13 +732,10 @@
 
         function openTeacherRegistration() {
             hideAllViews();
-            
             const nameInput = document.getElementById('new-teacher-name');
             if(nameInput) nameInput.value = '';
-            
             const pinInput = document.getElementById('new-teacher-pin');
             if(pinInput) pinInput.value = '';
-
             document.getElementById('view-register')?.classList.remove('hidden');
         }
 
@@ -780,16 +779,12 @@
             renderAdminTeacherList();
         }
 
-        // --- SEGURIDAD Y LOGIN ---
         function promptLogin(role) {
             pendingLoginRole = role;
-            
             const roleText = document.getElementById('login-role-text');
             if (roleText) roleText.innerText = role === 'admin' ? 'ADMINISTRADOR DEL SISTEMA' : 'DIRECCIÓN ESCOLAR';
-            
             const pwdInput = document.getElementById('login-password');
             if (pwdInput) pwdInput.value = '';
-            
             document.getElementById('login-error')?.classList.add('hidden');
             document.getElementById('modal-login')?.classList.remove('hidden');
         }
@@ -797,7 +792,6 @@
         function verifyLogin() {
             const pwdInput = document.getElementById('login-password');
             const pass = pwdInput ? pwdInput.value : '';
-            
             if (pass === PASSWORDS[pendingLoginRole]) {
                 currentRole = pendingLoginRole;
                 closeModal('modal-login');
@@ -810,10 +804,8 @@
         function loadAdminDashboard() {
             hideAllViews();
             document.getElementById('view-admin')?.classList.remove('hidden');
-            
             const schoolYearInput = document.getElementById('input-school-year');
             if (schoolYearInput) schoolYearInput.value = GLOBAL_SCHOOL_YEAR;
-            
             const title = document.getElementById('admin-panel-title');
             const roleBadge = document.getElementById('admin-panel-role');
             const adminOnlySec = document.getElementById('admin-only-section');
@@ -834,12 +826,12 @@
                 adminOnlySec?.classList.add('hidden');
             }
             renderAdminTeacherList();
+            loadStatsFromCloud(); // Actualizamos datos al entrar al panel
         }
 
         async function saveSchoolYear() {
             const input = document.getElementById('input-school-year');
             if (input) GLOBAL_SCHOOL_YEAR = input.value.trim();
-            
             updateSchoolYearDisplay();
             await showCustomDialog({ type: 'alert', title: 'Actualizado', message: "Ciclo escolar actualizado correctamente." });
         }
@@ -869,9 +861,7 @@
 
         async function removeTeacher(name) {
             const confirmed = await showCustomDialog({ 
-                type: 'confirm', 
-                title: 'Eliminar Docente', 
-                message: `¿Estás seguro de dar de baja al docente:\n${name}?` 
+                type: 'confirm', title: 'Eliminar Docente', message: `¿Estás seguro de dar de baja al docente:\n${name}?` 
             });
             if(confirmed) {
                 teachersDB = teachersDB.filter(t => t.name !== name);
@@ -889,8 +879,7 @@
 
         async function resetTeacherPin(name) {
             const newPin = await showCustomDialog({
-                type: 'prompt', inputType: 'text', title: 'Resetear NIP',
-                message: `Ingresa el nuevo NIP de 4 dígitos para:\n${name}`, placeholder: 'Ej. 1234'
+                type: 'prompt', inputType: 'text', title: 'Resetear NIP', message: `Ingresa el nuevo NIP de 4 dígitos para:\n${name}`, placeholder: 'Ej. 1234'
             });
 
             if (newPin !== null) {
@@ -919,7 +908,6 @@
             hideAllViews();
             document.getElementById('view-selector')?.classList.remove('hidden');
             document.getElementById('teacher-container')?.classList.add('hidden');
-            
             const btnStart = document.getElementById('btn-start');
             if (btnStart) {
                 btnStart.disabled = false;
@@ -929,7 +917,6 @@
             }
         }
 
-        // --- TABLERO DE ESTADÍSTICAS ---
         function openStatistics() {
             hideAllViews();
             document.getElementById('view-statistics')?.classList.remove('hidden');
@@ -946,7 +933,6 @@
                 local.setMinutes(local.getMinutes() - local.getTimezoneOffset());
                 dateInput.value = local.toISOString().slice(0,10);
             }
-            
             renderStatistics();
         }
 
@@ -964,7 +950,8 @@
             let groupA = 0, groupF = 0, groupR = 0, groupJ = 0;
 
             students.sort((a, b) => a.n.localeCompare(b.n, 'es-MX', { sensitivity: 'base' })).forEach(s => {
-                const st = mockStats[s.n] || { a:0, f:0, r:0, j:0, total:0 };
+                // Usamos las estadísticas reales provenientes de la nube o en cero si no hay.
+                const st = realStats[s.n] || { a:0, f:0, r:0, j:0, total:0 };
                 groupA += st.a; groupF += st.f; groupR += st.r; groupJ += st.j;
                 
                 const attendancePercentage = st.total > 0 ? Math.round(((st.a + st.r + st.j) / st.total) * 100) : 0;
@@ -1082,21 +1069,17 @@
             document.getElementById('modal-student-detail')?.classList.remove('hidden');
         }
 
-        // --- FUNCIONES CORE DE ASISTENCIA ---
         function renderSubjectSelect(grade) {
             const baseSubjects = subjectsByGrade[grade] || [];
             const customSubjects = customSubjectsByGrade[grade] || [];
-            
             let html = `<option value="">-- Elige materia --</option>`;
             baseSubjects.forEach(s => html += `<option value="${s}">${s}</option>`);
-            
             if (customSubjects.length > 0) {
                 html += `<optgroup label="Materias Personalizadas">`;
                 customSubjects.forEach(s => html += `<option value="${s}">${s}</option>`);
                 html += `</optgroup>`;
             }
             html += `<option value="ADD_NEW" class="font-black text-orange-600">➕ Crear nueva materia...</option>`;
-            
             const subjectSelect = document.getElementById('subject-select');
             if(subjectSelect) subjectSelect.innerHTML = html;
         }
@@ -1104,14 +1087,11 @@
         function selectGroup(g, id) {
             selectedGroup = g;
             document.querySelectorAll('.group-btn').forEach(b => { b.className = 'group-btn py-4 flex flex-col items-center justify-center gap-2 rounded-2xl text-sm font-black border-2 bg-slate-50 border-slate-50 text-slate-500 hover:border-slate-200 transition-all active:scale-95'; });
-            
             const btnGroup = document.getElementById(`btn-group-${id}`);
             if (btnGroup) btnGroup.className = 'group-btn py-4 flex flex-col items-center justify-center gap-2 rounded-2xl text-sm font-black border-2 bg-blue-950 border-blue-950 text-white shadow-xl shadow-blue-900/30 transition-all active:scale-95';
-
             const grade = g.charAt(0);
             const gradeLabel = document.getElementById('grade-label');
             if(gradeLabel) gradeLabel.innerText = `2. Materia (${grade}° Sec)`;
-            
             renderSubjectSelect(grade);
             document.getElementById('subject-container')?.classList.remove('hidden');
             checkStartBtn();
@@ -1119,12 +1099,10 @@
 
         async function selectSubject(val) {
             const grade = selectedGroup.charAt(0);
-            
             if (val === 'ADD_NEW') {
                 const newSubj = await showCustomDialog({
                     type: 'prompt', title: 'Crear Nueva Materia', message: 'Escribe el nombre de la nueva materia:', placeholder: 'Ej. Taller de Robótica...'
                 });
-
                 if (newSubj && newSubj.trim() !== '') {
                     const formattedSubj = newSubj.trim().toUpperCase();
                     if (!customSubjectsByGrade[grade].includes(formattedSubj) && !(subjectsByGrade[grade] || []).includes(formattedSubj)) {
@@ -1139,15 +1117,11 @@
                     if(subjectSelect) subjectSelect.value = '';
                     selectedSubject = '';
                 }
-            } else {
-                selectedSubject = val;
-            }
+            } else { selectedSubject = val; }
 
             if (currentRole === 'teacher' && selectedSubject && selectedSubject !== 'ADD_NEW') {
                 document.getElementById('teacher-container')?.classList.remove('hidden');
-            } else {
-                document.getElementById('teacher-container')?.classList.add('hidden');
-            }
+            } else { document.getElementById('teacher-container')?.classList.add('hidden'); }
             checkStartBtn();
         }
 
@@ -1155,7 +1129,6 @@
             const isSub = document.getElementById('is-substitute')?.checked;
             document.getElementById('regular-teacher-div')?.classList.toggle('hidden', isSub);
             document.getElementById('substitute-teacher-div')?.classList.toggle('hidden', !isSub);
-            
             if(isSub) {
                 const tSelect = document.getElementById('teacher-select');
                 if (tSelect) tSelect.value = '';
@@ -1170,11 +1143,9 @@
             if (currentRole !== 'teacher') return;
             const btn = document.getElementById('btn-start');
             if(!btn) return;
-
             const isSub = document.getElementById('is-substitute')?.checked;
             const subInput = document.getElementById('substitute-name');
             const tSelect = document.getElementById('teacher-select');
-            
             let tName = isSub ? (subInput ? subInput.value.trim() : '') : (tSelect ? tSelect.value : '');
             
             if(selectedGroup && selectedSubject && tName) {
@@ -1199,7 +1170,6 @@
                         const enteredPin = await showCustomDialog({
                             type: 'prompt', inputType: 'password', title: 'Autenticación Requerida', message: `Ingresa tu NIP de seguridad de 4 dígitos, ${tName}:`, placeholder: '****'
                         });
-
                         if (enteredPin === null) return; 
                         if (enteredPin !== teacher.pin) {
                             await showCustomDialog({ type: 'alert', title: 'Acceso Denegado', message: 'El NIP ingresado es incorrecto.' });
@@ -1222,7 +1192,6 @@
             const newName = await showCustomDialog({
                 type: 'prompt', title: 'Renombrar Materia', message: 'Ingresa el nuevo nombre para esta materia:', defaultValue: customSubjectGroups[customId].name
             });
-            
             if (newName && newName.trim() !== '') {
                 customSubjectGroups[customId].name = newName.trim().toUpperCase();
                 const attSubj = document.getElementById('att-subject');
@@ -1270,7 +1239,6 @@
             
             const attSubj = document.getElementById('att-subject');
             if(attSubj) attSubj.innerHTML = displaySubject;
-            
             const attGroup = document.getElementById('att-group');
             if(attGroup) attGroup.innerText = selectedGroup;
             
@@ -1286,7 +1254,6 @@
             else openAttendanceAsAdmin();
         }
 
-        // --- LÓGICA DE ALUMNOS ---
         function getActiveStudentList() {
             if (isCustomSubject()) {
                 const customId = selectedGroup + '_' + selectedSubject;
@@ -1314,8 +1281,16 @@
 
                     const safeName = student.n.replace(/'/g, "\\'");
 
+                    // ¡NUEVO! Sistema de Alerta Temprana (Lee los datos reales)
+                    const st = realStats[student.n] || { f: 0 };
+                    let warningBadge = '';
+                    if (st.f >= 3) {
+                        warningBadge = `<div class="absolute -top-2 -left-2 bg-red-600 text-white text-[8px] font-black px-2 py-1 rounded-lg shadow-md border border-red-800 z-20 flex items-center gap-1 animate-pulse" title="Alerta: Acumula ${st.f} faltas"><i class="fa-solid fa-triangle-exclamation"></i> ${st.f} FALTAS</div>`;
+                    }
+
                     return `
                     <div class="bg-white p-5 rounded-[2.5rem] border border-slate-50 shadow-sm relative">
+                        ${warningBadge}
                         <button onclick="openIncidentModal('${safeName}')" class="absolute top-4 right-5 w-10 h-10 rounded-xl flex items-center justify-center transition-all ${incidentBtnClass}">
                             <i class="fa-solid fa-triangle-exclamation"></i>
                         </button>
@@ -1355,7 +1330,6 @@
         
         function handleSearch(e) { searchTerm = e.target.value; renderStudents(); }
 
-        // --- GESTIÓN DE ALUMNOS ---
         function getTargetEditingList() {
             if (currentEditingTarget.type === 'custom') {
                 return customSubjectGroups[currentEditingTarget.id].students;
@@ -1430,7 +1404,6 @@
                 }
                 
                 targetList.push({ id: name, n: name });
-                mockStats[name] = { a: 0, f: 0, r: 0, j: 0, total: 0 }; 
                 
                 if(input) input.value = ''; 
                 renderManageList();
@@ -1455,7 +1428,6 @@
                 if (name) {
                     if (!targetList.some(s => s.n === name)) {
                         targetList.push({ id: name, n: name });
-                        mockStats[name] = { a: 0, f: 0, r: 0, j: 0, total: 0 }; 
                         addedCount++;
                     }
                 }
@@ -1481,13 +1453,12 @@
             } else {
                 studentsDB[currentEditingTarget.id] = studentsDB[currentEditingTarget.id].filter(s => s.n !== name);
             }
-            delete attendanceData[name]; delete incidentData[name]; delete mockStats[name];
+            delete attendanceData[name]; delete incidentData[name];
             renderManageList();
 
             if (currentEditingTarget.type === 'base') syncGroupToCloud(currentEditingTarget.id);
         }
 
-        // --- UTILIDADES GLOBALES Y SIMULACIÓN DE ENVÍO ---
         function openIncidentModal(name) {
             currentIncidentStudentId = name;
             const sn = document.getElementById('modal-student-name');
@@ -1537,6 +1508,8 @@
                     await fetch(GOOGLE_APP_SCRIPT_URL, {
                         method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
                     });
+                    // Refrescamos las estadísticas reales tras guardar
+                    setTimeout(() => { loadStatsFromCloud(); }, 2000);
                 } else {
                     await new Promise(resolve => setTimeout(resolve, 1500));
                 }
