@@ -38,7 +38,6 @@
 
     <main class="max-w-md mx-auto p-4 flex-1 w-full">
         
-        <!-- VISTA: PORTAL -->
         <div id="view-portal" class="space-y-4 fade-in">
             <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-blue-900/10 border border-slate-100 text-center">
                 <div class="mx-auto mb-6 flex justify-center">
@@ -73,7 +72,6 @@
             </div>
         </div>
 
-        <!-- VISTA: REGISTRO DOCENTE -->
         <div id="view-register" class="space-y-6 fade-in hidden">
             <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-blue-900/10 border border-slate-100">
                 <button onclick="goToPortal()" class="text-slate-400 mb-4 hover:text-blue-950 transition-colors"><i class="fa-solid fa-arrow-left"></i> Volver</button>
@@ -96,7 +94,6 @@
             </div>
         </div>
 
-        <!-- VISTA: PANEL ADMIN / DIRECCIÓN -->
         <div id="view-admin" class="space-y-6 fade-in hidden">
             <div class="bg-white rounded-[2.5rem] p-6 shadow-xl shadow-blue-900/10 border border-slate-100">
                 <div class="flex items-center justify-between mb-6">
@@ -144,7 +141,6 @@
             </div>
         </div>
 
-        <!-- VISTA: ESTADÍSTICAS -->
         <div id="view-statistics" class="space-y-6 fade-in hidden">
             <div class="bg-white rounded-[2.5rem] p-6 shadow-xl shadow-blue-900/10 border border-slate-100">
                 <div class="flex items-center justify-between mb-6">
@@ -208,7 +204,6 @@
             </div>
         </div>
 
-        <!-- VISTA: SELECTOR DE LISTA -->
         <div id="view-selector" class="space-y-6 fade-in hidden">
             <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-blue-900/10 border border-slate-100">
                 <div class="flex items-center justify-between mb-8">
@@ -267,7 +262,6 @@
             </div>
         </div>
 
-        <!-- VISTA: ASISTENCIA -->
         <div id="view-attendance" class="space-y-5 slide-in hidden pb-36">
             <div class="bg-white p-6 rounded-[2rem] shadow-md border border-slate-100 flex flex-col gap-4 relative overflow-hidden">
                 <div id="edit-mode-banner" class="hidden absolute top-0 left-0 right-0 bg-emerald-500 text-white text-[9px] font-black text-center py-1 uppercase tracking-widest z-10">
@@ -320,7 +314,6 @@
             </div>
         </div>
 
-        <!-- VISTA: ÉXITO -->
         <div id="view-success" class="flex flex-col items-center justify-center min-h-[75vh] text-center space-y-8 fade-in hidden">
             <div class="relative">
                 <div class="w-32 h-32 bg-emerald-100 text-emerald-600 rounded-[3rem] flex items-center justify-center shadow-2xl shadow-emerald-200">
@@ -341,7 +334,6 @@
             </button>
         </div>
 
-        <!-- MODALES -->
         <div id="modal-login" class="fixed inset-0 bg-slate-900/80 z-[100] hidden flex justify-center items-center px-4 fade-in">
             <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl relative text-center">
                 <button onclick="closeModal('modal-login')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full active:scale-90 transition-all"><i class="fa-solid fa-xmark"></i></button>
@@ -455,7 +447,7 @@
             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
                 <i class="fa-solid fa-copyright"></i> Propiedad Colegio Gran Bretaña<br>
                 <span class="text-blue-900">Departamento de Innovación Tecnológica CGB</span><br>
-                <span class="text-[8px] text-slate-500 normal-case tracking-normal">by L.I.E. ARTURO PALACIOS GONZALEZ • Versión 1.2</span>
+                <span class="text-[8px] text-slate-500 normal-case tracking-normal">by L.I.E. ARTURO PALACIOS GONZALEZ • Versión 1.3</span>
             </p>
         </div>
     </footer>
@@ -463,7 +455,7 @@
     <script>
         // --- CONEXIÓN A GOOGLE DRIVE ---
         // ⚠️ PEGA AQUÍ LA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT:
-        const GOOGLE_APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwkAWAoHvkrgDL-sWFsOXE_rcGobqxPq1j1v_xCH7yGruLAXbLC-u0gt1d36tv1yG7F/exec';
+        const GOOGLE_APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxieo7isSsBTOuAU3FkhD8nsVLrE8tbZxGKoIPGkjQEAl1xSsgoGGONOtRtu_0iN6js/exec';
 
         // --- BASE DE DATOS Y ESTADO GLOBAL ---
         let GLOBAL_SCHOOL_YEAR = '2024 - 2025';
@@ -485,49 +477,89 @@
 
         let customSubjectsByGrade = { '1': [], '2': [], '3': [] };
 
-        // ¡Actualizado! Ahora el ID del alumno es el propio nombre para evitar números en Excel
-        let studentsDB = {
+        // --- ALUMNOS (CARGA DINÁMICA DESDE GOOGLE SHEETS) ---
+        // Esta es la base de respaldo por si no hay internet
+        let defaultStudentsDB = {
             '1° A': [
                 {id: 'AGUILAR HERNÁNDEZ SANTIAGO', n: 'AGUILAR HERNÁNDEZ SANTIAGO'},
-                {id: 'ÁLVAREZ LÓPEZ MARÍA FERNANDA', n: 'ÁLVAREZ LÓPEZ MARÍA FERNANDA'},
-                {id: 'BAUTISTA RAMÍREZ EMILIANO', n: 'BAUTISTA RAMÍREZ EMILIANO'},
-                {id: 'CARMONA RUIZ VALERIA', n: 'CARMONA RUIZ VALERIA'},
-                {id: 'CASTILLO MENDOZA DIEGO', n: 'CASTILLO MENDOZA DIEGO'},
-                {id: 'CRUZ VÁZQUEZ ANA SOFÍA', n: 'CRUZ VÁZQUEZ ANA SOFÍA'},
-                {id: 'DÍAZ FLORES LEONARDO', n: 'DÍAZ FLORES LEONARDO'},
-                {id: 'DOMÍNGUEZ PÉREZ CAMILA', n: 'DOMÍNGUEZ PÉREZ CAMILA'},
-                {id: 'ESTRADA GÓMEZ ALEJANDRO', n: 'ESTRADA GÓMEZ ALEJANDRO'},
-                {id: 'FERNÁNDEZ JIMÉNEZ DANIELA', n: 'FERNÁNDEZ JIMÉNEZ DANIELA'},
-                {id: 'GARCÍA TORRES MATEO', n: 'GARCÍA TORRES MATEO'},
-                {id: 'GÓMEZ REYES ISABELLA', n: 'GÓMEZ REYES ISABELLA'},
-                {id: 'GONZÁLEZ MORALES SEBASTIÁN', n: 'GONZÁLEZ MORALES SEBASTIÁN'},
-                {id: 'HERNÁNDEZ CRUZ VALENTINA', n: 'HERNÁNDEZ CRUZ VALENTINA'},
-                {id: 'JIMÉNEZ ORTIZ NICOLÁS', n: 'JIMÉNEZ ORTIZ NICOLÁS'},
-                {id: 'LÓPEZ GUTIÉRREZ RENATA', n: 'LÓPEZ GUTIÉRREZ RENATA'},
-                {id: 'MARTÍNEZ SÁNCHEZ MATÍAS', n: 'MARTÍNEZ SÁNCHEZ MATÍAS'},
-                {id: 'MEDINA CHÁVEZ XIMENA', n: 'MEDINA CHÁVEZ XIMENA'},
-                {id: 'MENDOZA CASTRO LUIS ÁNGEL', n: 'MENDOZA CASTRO LUIS ÁNGEL'},
-                {id: 'ORTIZ NAVARRO VICTORIA', n: 'ORTIZ NAVARRO VICTORIA'},
-                {id: 'PÉREZ DÍAZ GAEL', n: 'PÉREZ DÍAZ GAEL'},
-                {id: 'RAMÍREZ ÁLVAREZ ROMINA', n: 'RAMÍREZ ÁLVAREZ ROMINA'},
-                {id: 'RODRÍGUEZ ROMERO MAXIMILIANO', n: 'RODRÍGUEZ ROMERO MAXIMILIANO'},
-                {id: 'SÁNCHEZ HERRERA SOFÍA', n: 'SÁNCHEZ HERRERA SOFÍA'},
-                {id: 'VARGAS LUNA DANIEL', n: 'VARGAS LUNA DANIEL'}
+                {id: 'ÁLVAREZ LÓPEZ MARÍA FERNANDA', n: 'ÁLVAREZ LÓPEZ MARÍA FERNANDA'}
             ],
-            '2° B': [{id: 'ALFEREZ BETANCOURT PAULA MICHELLE', n: 'ALFEREZ BETANCOURT PAULA MICHELLE'}, {id: 'AVILA FERNANDEZ MARIA JOSE', n: 'AVILA FERNANDEZ MARIA JOSE'}, {id: 'CENOBIO HERNANDEZ KAIRI ANDREA', n: 'CENOBIO HERNANDEZ KAIRI ANDREA'}],
-            '3° C': [{id: 'AGUILERA CARRO ITZAE', n: 'AGUILERA CARRO ITZAE'}, {id: 'ANDRADE JIMENEZ MARIO', n: 'ANDRADE JIMENEZ MARIO'}],
+            '2° B': [{id: 'ALFEREZ BETANCOURT PAULA MICHELLE', n: 'ALFEREZ BETANCOURT PAULA MICHELLE'}],
+            '3° C': [{id: 'AGUILERA CARRO ITZAE', n: 'AGUILERA CARRO ITZAE'}],
             '3° A': [{id: 'AGUILAR GALLEGOS STEPHANIE MAITE', n: 'AGUILAR GALLEGOS STEPHANIE MAITE'}]
         };
 
+        let studentsDB = {};
+        
+        function loadStudentsFromLocal() {
+            try {
+                if (typeof window !== 'undefined' && 'localStorage' in window && window['localStorage'] !== null) {
+                    const saved = window.localStorage.getItem('cgb_students');
+                    if (saved) studentsDB = JSON.parse(saved);
+                    else studentsDB = JSON.parse(JSON.stringify(defaultStudentsDB));
+                } else { studentsDB = JSON.parse(JSON.stringify(defaultStudentsDB)); }
+            } catch(e) { studentsDB = JSON.parse(JSON.stringify(defaultStudentsDB)); }
+            
+            // Asegurar que todos los grupos existan vacíos si no tienen alumnos
+            groups.forEach(g => { if(!studentsDB[g]) studentsDB[g] = []; });
+        }
+
+        function saveStudentsToLocal() {
+            try {
+                if (typeof window !== 'undefined' && 'localStorage' in window && window['localStorage'] !== null) {
+                    window.localStorage.setItem('cgb_students', JSON.stringify(studentsDB));
+                }
+            } catch(e) {}
+        }
+
+        async function loadStudentsFromCloud() {
+            if (!GOOGLE_APP_SCRIPT_URL || GOOGLE_APP_SCRIPT_URL === '') {
+                loadStudentsFromLocal();
+                return;
+            }
+            try {
+                const response = await fetch(GOOGLE_APP_SCRIPT_URL + '?action=getStudents');
+                const data = await response.json();
+                if (data && Object.keys(data).length > 0) {
+                    studentsDB = data; // Usamos los de la nube como oficiales
+                    groups.forEach(g => { if(!studentsDB[g]) studentsDB[g] = []; });
+                    saveStudentsToLocal();
+                } else {
+                    loadStudentsFromLocal(); // Si viene vacío
+                }
+            } catch (e) {
+                console.warn("Fallo carga alumnos nube", e);
+                loadStudentsFromLocal();
+            }
+        }
+
+        // Función para subir una lista oficial a Google Sheets
+        async function syncGroupToCloud(groupName) {
+            saveStudentsToLocal(); // Siempre guardar en celular primero
+            if (!GOOGLE_APP_SCRIPT_URL || GOOGLE_APP_SCRIPT_URL === '') return;
+            
+            const studentsInGroup = studentsDB[groupName].map(s => s.n);
+            const payload = {
+                action: 'syncGroup',
+                group: groupName,
+                students: studentsInGroup
+            };
+            fetch(GOOGLE_APP_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).catch(e => console.error(e));
+        }
+
         let customSubjectGroups = {};
 
-        // --- SISTEMA DE ALMACENAMIENTO DE MAESTROS EN LA NUBE ---
+        // --- MAESTROS (CARGA DINÁMICA DESDE GOOGLE SHEETS) ---
         let teachersDB = [
             { name: 'PROFA. MARÍA ELENA', pin: '1234' },
             { name: 'PROF. ROBERTO CARLOS', pin: '5678' }
         ];
 
-        // Función para cargar maestros guardados localmente como respaldo rápido
         function loadTeachersFromLocal() {
             try {
                 if (typeof window !== 'undefined' && 'localStorage' in window && window['localStorage'] !== null) {
@@ -537,7 +569,6 @@
             } catch (e) {}
         }
 
-        // Función para guardar maestros como respaldo local
         function saveTeachersToLocal() {
             try {
                 if (typeof window !== 'undefined' && 'localStorage' in window && window['localStorage'] !== null) {
@@ -546,28 +577,22 @@
             } catch (e) {}
         }
 
-        // ¡NUEVO! Función para traer la lista oficial de maestros desde Google Sheets
         async function loadTeachersFromCloud() {
             if (!GOOGLE_APP_SCRIPT_URL || GOOGLE_APP_SCRIPT_URL === '') {
                 loadTeachersFromLocal();
                 refreshTeacherDropdowns();
                 return;
             }
-
             try {
-                // Hacemos una petición GET a tu Google Apps Script
                 const response = await fetch(GOOGLE_APP_SCRIPT_URL + '?action=getTeachers');
                 const data = await response.json();
-                
                 if (data && Array.isArray(data) && data.length > 0) {
-                    teachersDB = data; // Reemplazamos los locales por la base de datos maestra
-                    saveTeachersToLocal(); // Actualizamos el respaldo local
-                    refreshTeacherDropdowns();
+                    teachersDB = data;
+                    saveTeachersToLocal(); 
                 } else {
-                    loadTeachersFromLocal(); // Si viene vacío, usamos respaldo
+                    loadTeachersFromLocal(); 
                 }
             } catch (error) {
-                console.warn("No se pudo cargar desde la nube. Usando memoria local.", error);
                 loadTeachersFromLocal();
             }
             refreshTeacherDropdowns();
@@ -661,15 +686,16 @@
             const adminGroupContainer = document.getElementById('admin-group-container');
             if (adminGroupContainer) adminGroupContainer.innerHTML = adminGroupHtml;
 
-            // Iniciar la descarga de maestros desde Google
+            // Iniciar la descarga de maestros y alumnos desde Google
             loadTeachersFromCloud();
-            generateMockStats(); 
+            loadStudentsFromCloud().then(() => {
+                generateMockStats(); 
+            });
         });
 
         function generateMockStats() {
             Object.keys(studentsDB).forEach(group => {
                 studentsDB[group].forEach(student => {
-                    // Ahora la base de estadísticas se amarra directamente al nombre (student.n)
                     if (!mockStats[student.n]) {
                         const totalClasses = 30; 
                         const f = Math.floor(Math.random() * 4); 
@@ -742,17 +768,14 @@
             if (!name.startsWith("PROF")) { name = "PROF. " + name; }
             
             if (!teachersDB.find(t => t.name === name)) {
-                // Lo agregamos a la interfaz inmediatamente
                 teachersDB.push({ name: name, pin: pin });
                 saveTeachersToLocal();
                 refreshTeacherDropdowns();
                 
-                // ¡NUEVO! Lo mandamos a guardar a Google Sheets en segundo plano
                 if (GOOGLE_APP_SCRIPT_URL && GOOGLE_APP_SCRIPT_URL !== '') {
                     const payload = { action: 'registerTeacher', name: name, pin: pin };
                     fetch(GOOGLE_APP_SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
+                        method: 'POST', mode: 'no-cors',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     }).catch(e => console.error("Error guardando en la nube", e));
@@ -872,12 +895,9 @@
                 saveTeachersToLocal();
                 refreshTeacherDropdowns();
 
-                // ¡NUEVO! Actualizar en Google Sheets
                 if (GOOGLE_APP_SCRIPT_URL && GOOGLE_APP_SCRIPT_URL !== '') {
                     fetch(GOOGLE_APP_SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
+                        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ action: 'updateTeacher', name: name, delete: true })
                     }).catch(e => console.error(e));
                 }
@@ -886,11 +906,8 @@
 
         async function resetTeacherPin(name) {
             const newPin = await showCustomDialog({
-                type: 'prompt',
-                inputType: 'text',
-                title: 'Resetear NIP',
-                message: `Ingresa el nuevo NIP de 4 dígitos para:\n${name}`,
-                placeholder: 'Ej. 1234'
+                type: 'prompt', inputType: 'text', title: 'Resetear NIP',
+                message: `Ingresa el nuevo NIP de 4 dígitos para:\n${name}`, placeholder: 'Ej. 1234'
             });
 
             if (newPin !== null) {
@@ -901,16 +918,12 @@
                         saveTeachersToLocal();
                         renderAdminTeacherList();
 
-                        // ¡NUEVO! Actualizar en Google Sheets
                         if (GOOGLE_APP_SCRIPT_URL && GOOGLE_APP_SCRIPT_URL !== '') {
                             fetch(GOOGLE_APP_SCRIPT_URL, {
-                                method: 'POST',
-                                mode: 'no-cors',
-                                headers: { 'Content-Type': 'application/json' },
+                                method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ action: 'updateTeacher', name: name, pin: teacher.pin, delete: false })
                             }).catch(e => console.error(e));
                         }
-
                         await showCustomDialog({ type: 'alert', title: 'Actualizado', message: `El NIP de ${name} se actualizó a: ${teacher.pin}` });
                     }
                 } else {
@@ -1029,9 +1042,7 @@
                         }]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '75%',
+                        responsive: true, maintainAspectRatio: false, cutout: '75%',
                         plugins: { legend: { display: false }, tooltip: { bodyFont: { family: 'sans-serif', weight: 'bold' }, padding: 10, cornerRadius: 10, displayColors: true } },
                         animation: { animateScale: true, animateRotate: true }
                     }
@@ -1128,10 +1139,7 @@
             
             if (val === 'ADD_NEW') {
                 const newSubj = await showCustomDialog({
-                    type: 'prompt',
-                    title: 'Crear Nueva Materia',
-                    message: 'Escribe el nombre de la nueva materia:',
-                    placeholder: 'Ej. Taller de Robótica, Inglés Avanzado...'
+                    type: 'prompt', title: 'Crear Nueva Materia', message: 'Escribe el nombre de la nueva materia:', placeholder: 'Ej. Taller de Robótica...'
                 });
 
                 if (newSubj && newSubj.trim() !== '') {
@@ -1206,15 +1214,10 @@
                     
                     if (teacher) {
                         const enteredPin = await showCustomDialog({
-                            type: 'prompt',
-                            inputType: 'password',
-                            title: 'Autenticación Requerida',
-                            message: `Ingresa tu NIP de seguridad de 4 dígitos, ${tName}:`,
-                            placeholder: '****'
+                            type: 'prompt', inputType: 'password', title: 'Autenticación Requerida', message: `Ingresa tu NIP de seguridad de 4 dígitos, ${tName}:`, placeholder: '****'
                         });
 
                         if (enteredPin === null) return; 
-                        
                         if (enteredPin !== teacher.pin) {
                             await showCustomDialog({ type: 'alert', title: 'Acceso Denegado', message: 'El NIP ingresado es incorrecto.' });
                             return; 
@@ -1234,10 +1237,7 @@
         async function renameCustomGroup() {
             const customId = selectedGroup + '_' + selectedSubject;
             const newName = await showCustomDialog({
-                type: 'prompt',
-                title: 'Renombrar Materia',
-                message: 'Ingresa el nuevo nombre para esta materia:',
-                defaultValue: customSubjectGroups[customId].name
+                type: 'prompt', title: 'Renombrar Materia', message: 'Ingresa el nuevo nombre para esta materia:', defaultValue: customSubjectGroups[customId].name
             });
             
             if (newName && newName.trim() !== '') {
@@ -1324,7 +1324,6 @@
             const studentListEl = document.getElementById('student-list');
             if(studentListEl) {
                 studentListEl.innerHTML = filtered.map(student => {
-                    // ¡Forzamos a usar student.n en lugar de student.id para todo!
                     const status = attendanceData[student.n] || '';
                     const hasIncident = !!incidentData[student.n];
                     const getBtnClass = (target, activeColor) => status === target ? `${activeColor} border-transparent shadow-lg scale-105 z-10 text-white` : `bg-white text-slate-400 border-slate-100 hover:border-slate-200`;
@@ -1452,6 +1451,9 @@
                 
                 if(input) input.value = ''; 
                 renderManageList();
+
+                // !NUEVO! Sincronizar automáticamente con Google Sheets
+                if (currentEditingTarget.type === 'base') syncGroupToCloud(currentEditingTarget.id);
             }
         }
 
@@ -1480,6 +1482,10 @@
             if(btn) {
                 const originalText = btn.innerHTML;
                 btn.innerHTML = `<i class="fa-solid fa-check-double"></i> ¡${addedCount} Importados!`;
+                
+                // !NUEVO! Sincronizar automáticamente con Google Sheets
+                if (currentEditingTarget.type === 'base') syncGroupToCloud(currentEditingTarget.id);
+
                 setTimeout(() => {
                     btn.innerHTML = originalText;
                     if(textEl) textEl.value = '';
@@ -1496,6 +1502,9 @@
             }
             delete attendanceData[name]; delete incidentData[name]; delete mockStats[name];
             renderManageList();
+
+            // !NUEVO! Sincronizar automáticamente con Google Sheets
+            if (currentEditingTarget.type === 'base') syncGroupToCloud(currentEditingTarget.id);
         }
 
         // --- UTILIDADES GLOBALES Y SIMULACIÓN DE ENVÍO ---
@@ -1544,18 +1553,11 @@
             };
             
             try {
-                // Solo intentamos enviar a Google si hay una URL configurada
                 if (GOOGLE_APP_SCRIPT_URL && GOOGLE_APP_SCRIPT_URL !== '') {
                     await fetch(GOOGLE_APP_SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors', 
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(payload)
+                        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
                     });
                 } else {
-                    // Simulamos un pequeño retraso de red si no hay URL
                     await new Promise(resolve => setTimeout(resolve, 1500));
                 }
 
@@ -1563,10 +1565,7 @@
                 document.getElementById('view-success')?.classList.remove('hidden');
             } catch (error) {
                 console.error("Error al guardar en Drive:", error);
-                await showCustomDialog({
-                    title: 'Error de Red',
-                    message: 'Hubo un problema de conexión. Revisa tu internet y vuelve a intentar.'
-                });
+                await showCustomDialog({ title: 'Error de Red', message: 'Hubo un problema de conexión. Revisa tu internet y vuelve a intentar.' });
             } finally {
                 btn.innerHTML = ogHTML;
                 btn.className = "w-full bg-slate-900 text-white font-black py-6 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] flex items-center justify-center gap-4 active:scale-95 transition-all";
