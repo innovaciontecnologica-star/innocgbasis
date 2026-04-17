@@ -29,7 +29,7 @@
     <!-- PANTALLA DE BIENVENIDA (SPLASH SCREEN) -->
     <div id="splash-screen" class="fixed inset-0 bg-blue-950 z-[9999] flex flex-col items-center justify-center transition-opacity duration-700">
         <div class="mb-6 mascot-pulse">
-            <img src="logo%20guardianes.png" alt="Guardianes CGB" class="w-32 h-32 object-contain drop-shadow-2xl" onerror="this.onerror=null; this.src='https://placehold.co/200/1e1b4b/white?text=CGB';">
+            <img src="logo guardianes.png" alt="Guardianes CGB" class="w-32 h-32 object-contain drop-shadow-2xl" onerror="this.onerror=null; this.src='https://placehold.co/200/1e1b4b/white?text=CGB';">
         </div>
         <h1 class="text-white font-black text-3xl tracking-tight mb-2">CGB DIGITAL</h1>
         <p class="text-orange-400 text-xs font-bold uppercase tracking-[0.3em] animate-pulse">Iniciando Sistema...</p>
@@ -39,7 +39,7 @@
         <div class="max-w-md mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3 cursor-pointer" onclick="goToPortal()">
                 <div class="bg-black/20 p-1 rounded-xl backdrop-blur-md border border-white/10 flex items-center justify-center shadow-inner">
-                    <img src="logo%20guardianes.png" alt="Guardianes CGB" class="w-10 h-10 object-contain rounded-lg" onerror="this.onerror=null; this.src='https://placehold.co/100/1e1b4b/white?text=CGB';">
+                    <img src="logo guardianes.png" alt="Guardianes CGB" class="w-10 h-10 object-contain rounded-lg" onerror="this.onerror=null; this.src='https://placehold.co/100/1e1b4b/white?text=CGB';">
                 </div>
                 <div>
                     <h1 class="font-black text-lg leading-none tracking-tight">CGB DIGITAL</h1>
@@ -59,7 +59,7 @@
         <div id="view-portal" class="space-y-4 fade-in">
             <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-blue-900/10 border border-slate-100 text-center">
                 <div class="mx-auto mb-6 flex justify-center">
-                    <img src="logo%20CGB.png" alt="Colegio Gran Bretaña" class="h-16 md:h-20 object-contain" onerror="this.onerror=null; this.src='https://placehold.co/200x80/1e1b4b/white?text=CGB';">
+                    <img src="logo CGB.png" alt="Colegio Gran Bretaña" class="h-16 md:h-20 object-contain" onerror="this.onerror=null; this.src='https://placehold.co/200x80/1e1b4b/white?text=CGB';">
                 </div>
                 <h2 class="text-2xl font-black text-slate-800 tracking-tight">Bienvenido</h2>
                 <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1 mb-8">Selecciona tu perfil de acceso</p>
@@ -311,7 +311,7 @@
     <footer class="w-full text-center py-6 mt-auto relative z-10">
         <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">
             <i class="fa-solid fa-copyright"></i> Propiedad Colegio Gran Bretaña<br>
-            <span class="text-blue-900">L.I.E. ARTURO PALACIOS GONZALEZ • Versión 2.1</span>
+            <span class="text-blue-900">L.I.E. ARTURO PALACIOS GONZALEZ • Versión 2.2</span>
         </p>
     </footer>
 
@@ -416,7 +416,10 @@
 
         // --- RENDERIZADO INICIAL ---
         function renderBaseGroups() {
-            const html = groups.map(g => `<button onclick="selectGroup('${g}')" id="btn-group-${g.replace('° ','-')}" class="group-btn py-4 bg-slate-50 rounded-xl text-xs font-black border-2 border-transparent text-slate-500 transition-all">${g}</button>`).join('');
+            const html = groups.map(g => {
+                const safeId = g.replace(/[^a-zA-Z0-9]/g, '');
+                return `<button onclick="selectGroup('${g}')" id="btn-group-${safeId}" class="group-btn py-4 bg-slate-50 rounded-xl text-xs font-black border-2 border-transparent text-slate-500 transition-all">${g}</button>`;
+            }).join('');
             document.getElementById('group-container').innerHTML = html;
             
             const adminHtml = groups.map(g => `<button onclick="openManageFromAdmin('${g}')" class="py-2 bg-white border border-slate-200 rounded-lg text-[10px] font-black hover:border-blue-500 transition-all">${g}</button>`).join('');
@@ -452,8 +455,7 @@
             // Limpiar selecciones visuales cada vez que se entra
             selectedGroup = ''; selectedSubject = ''; currentTeacher = '';
             document.querySelectorAll('.group-btn').forEach(b => {
-                b.classList.remove('bg-blue-950', 'text-white', 'border-blue-950', 'shadow-md', 'scale-105');
-                b.classList.add('bg-slate-50', 'text-slate-500', 'border-transparent');
+                b.className = "group-btn py-4 rounded-xl text-xs font-black border-2 transition-all bg-slate-50 text-slate-500 border-transparent";
             });
             document.getElementById('subject-container').classList.add('hidden');
             document.getElementById('teacher-container').classList.add('hidden');
@@ -577,15 +579,14 @@
         function selectGroup(g) {
             selectedGroup = g;
             
-            // Efecto visual al seleccionar grupo
+            // Efecto visual al seleccionar grupo (FORZADO)
             document.querySelectorAll('.group-btn').forEach(b => {
-                b.classList.remove('bg-blue-950', 'text-white', 'border-blue-950', 'shadow-md', 'scale-105');
-                b.classList.add('bg-slate-50', 'text-slate-500', 'border-transparent');
+                b.className = "group-btn py-4 rounded-xl text-xs font-black border-2 transition-all bg-slate-50 text-slate-500 border-transparent";
             });
-            const btn = document.getElementById(`btn-group-${g.replace('° ','-')}`);
+            const safeId = g.replace(/[^a-zA-Z0-9]/g, '');
+            const btn = document.getElementById(`btn-group-${safeId}`);
             if(btn) {
-                btn.classList.remove('bg-slate-50', 'text-slate-500', 'border-transparent');
-                btn.classList.add('bg-blue-950', 'text-white', 'border-blue-950', 'shadow-md', 'scale-105');
+                btn.className = "group-btn py-4 rounded-xl text-xs font-black border-2 transition-all bg-blue-950 text-white border-blue-950 shadow-md scale-105";
             }
 
             const grade = g.charAt(0);
@@ -934,13 +935,6 @@
             }
         }
 
-        // --- INCIDENCIAS Y UTILIDADES ---
-        function openIncidentModal(name) {
-            currentIncidentStudentId = name;
-            document.getElementById('modal-student-name').innerText = name;
-            document.getElementById('incident-text').value = incidentData[name] || '';
-            document.getElementById('modal-incident').classList.remove('hidden');
-        }
         function clearIncident() { delete incidentData[currentIncidentStudentId]; closeModal('modal-incident'); renderStudents(); }
         function saveIncident() {
             const text = document.getElementById('incident-text').value.trim();
