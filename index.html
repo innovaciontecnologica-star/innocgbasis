@@ -447,7 +447,7 @@
             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
                 <i class="fa-solid fa-copyright"></i> Propiedad Colegio Gran Bretaña<br>
                 <span class="text-blue-900">Departamento de Innovación Tecnológica CGB</span><br>
-                <span class="text-[8px] text-slate-500 normal-case tracking-normal">by L.I.E. ARTURO PALACIOS GONZALEZ • Versión 1.3</span>
+                <span class="text-[8px] text-slate-500 normal-case tracking-normal">by L.I.E. ARTURO PALACIOS GONZALEZ • Versión 1.4</span>
             </p>
         </div>
     </footer>
@@ -688,25 +688,8 @@
 
             // Iniciar la descarga de maestros y alumnos desde Google
             loadTeachersFromCloud();
-            loadStudentsFromCloud().then(() => {
-                generateMockStats(); 
-            });
+            loadStudentsFromCloud();
         });
-
-        function generateMockStats() {
-            Object.keys(studentsDB).forEach(group => {
-                studentsDB[group].forEach(student => {
-                    if (!mockStats[student.n]) {
-                        const totalClasses = 30; 
-                        const f = Math.floor(Math.random() * 4); 
-                        const r = Math.floor(Math.random() * 3); 
-                        const j = Math.floor(Math.random() * 2); 
-                        const a = totalClasses - f - r - j;
-                        mockStats[student.n] = { a, f, r, j, total: totalClasses };
-                    }
-                });
-            });
-        }
 
         // --- NAVEGACIÓN Y PORTAL ---
         function hideAllViews() {
@@ -1447,12 +1430,11 @@
                 }
                 
                 targetList.push({ id: name, n: name });
-                mockStats[name] = { a: 30, f: 0, r: 0, j: 0, total: 30 }; 
+                mockStats[name] = { a: 0, f: 0, r: 0, j: 0, total: 0 }; 
                 
                 if(input) input.value = ''; 
                 renderManageList();
 
-                // !NUEVO! Sincronizar automáticamente con Google Sheets
                 if (currentEditingTarget.type === 'base') syncGroupToCloud(currentEditingTarget.id);
             }
         }
@@ -1473,7 +1455,7 @@
                 if (name) {
                     if (!targetList.some(s => s.n === name)) {
                         targetList.push({ id: name, n: name });
-                        mockStats[name] = { a: 30, f: 0, r: 0, j: 0, total: 30 }; 
+                        mockStats[name] = { a: 0, f: 0, r: 0, j: 0, total: 0 }; 
                         addedCount++;
                     }
                 }
@@ -1483,7 +1465,6 @@
                 const originalText = btn.innerHTML;
                 btn.innerHTML = `<i class="fa-solid fa-check-double"></i> ¡${addedCount} Importados!`;
                 
-                // !NUEVO! Sincronizar automáticamente con Google Sheets
                 if (currentEditingTarget.type === 'base') syncGroupToCloud(currentEditingTarget.id);
 
                 setTimeout(() => {
@@ -1503,7 +1484,6 @@
             delete attendanceData[name]; delete incidentData[name]; delete mockStats[name];
             renderManageList();
 
-            // !NUEVO! Sincronizar automáticamente con Google Sheets
             if (currentEditingTarget.type === 'base') syncGroupToCloud(currentEditingTarget.id);
         }
 
